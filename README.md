@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ## Description
 
 Tomato Market backend
@@ -22,6 +21,3 @@ Tomato Market backend
 ## Test
 
 
-=======
-# back-end
->>>>>>> 4670642 (Update README.md)
