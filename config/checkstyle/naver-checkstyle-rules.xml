@@ -18,7 +18,7 @@ The following rules in the Naver coding convention cannot be checked by this con
 -->
 
 <module name="Checker">
-    <property name="severity" value="warning"/>
+    <property name="severity" value="error"/>
     <property name="fileExtensions" value="java"/>
 
     <!-- [encoding-utf8] -->
@@ -26,7 +26,7 @@ The following rules in the Naver coding convention cannot be checked by this con
 
     <!-- [newline-lf] -->
     <module name="RegexpMultiline">
-        <property name="format" value="\n"/>
+        <property name="format" value="\r\n"/>
         <property name="message" value="[newline-lf] Line must end with LF, not CRLF"/>
     </module>
 
