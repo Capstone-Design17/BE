@@ -10,15 +10,20 @@ Tomato Market backend
 ## Installation
 
 ## Running the app
+
 ```bash
 ./gradlew bootRun
+nohup java -jar market-0.0.1.SNAPSHOT.jar
 ```
 
 ## Build
+
 ```bash
-./gradlew build
+./gradlew clean build
 ```
+
 ## Test
+
 ```bash
 ./gradlew test
 ```
