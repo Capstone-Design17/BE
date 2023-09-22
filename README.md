@@ -28,3 +28,6 @@ nohup java -jar market-0.0.1.SNAPSHOT.jar
 ./gradlew test
 ```
 
+## API Test
+
+- http://localhost:8080/swagger-ui/index.html
