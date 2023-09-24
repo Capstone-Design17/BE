@@ -1,9 +1,9 @@
 package com.tomato.market.service;
 
-import com.tomato.market.data.dto.UserDto;
+import com.tomato.market.data.dto.UserSignUpDto;
 
 public interface UserService {
-	public UserDto registerUser(UserDto userDto);
+	public UserSignUpDto registerUser(UserSignUpDto userSignUpDto);
 
-	public UserDto loginUser(UserDto userDto);
+	public UserSignUpDto loginUser(UserSignUpDto userSignUpDto);
 }

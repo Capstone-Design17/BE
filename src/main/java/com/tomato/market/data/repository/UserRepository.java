@@ -1,9 +1,11 @@
 package com.tomato.market.data.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tomato.market.data.entity.UserEntity;
 
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
-	UserEntity findByEmail(String userEmail); // Email을 통한 중복 체크
+	@Transactional
+	boolean existsByEmail(String email); // Email을 통한 중복 체크
 }

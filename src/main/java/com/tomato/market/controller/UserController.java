@@ -1,11 +1,13 @@
 package com.tomato.market.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tomato.market.data.dto.UserDto;
+import com.tomato.market.data.dto.UserSignUpDto;
 import com.tomato.market.service.UserService;
 
 import jakarta.validation.Valid;
@@ -16,25 +18,36 @@ public class UserController {
 	   	로그인
 		로그아웃	*/
 
+	private final Logger logger = LoggerFactory.getLogger(UserController.class);
+	private final UserService userService;
+
 	@Autowired
-	UserService userService;
+	public UserController(UserService userService) {
+		this.userService = userService;
+	}
+
+
+//	@GetMapping("/user/register") // react에서 처리?
 
 	@PostMapping("/user/register")
-	public String registerUser(@Valid @RequestBody UserDto userDto) {
-		// DTO로 Body값 받음, Valid로 검증
+	public String registerUser(@Valid @RequestBody UserSignUpDto userSignUpDto) { // DTO로 Body값 받음, Valid로 검증
+		logger.info("UserController.registerUser() is called");
 
 		// User 저장
-		UserDto registerResult = userService.registerUser(userDto);
+		UserSignUpDto registerResult = userService.registerUser(userSignUpDto);
 		if (registerResult != null) { // 회원가입 성공
-			return "회원가입 완료"; // redirect?
+			logger.info("UserController.registerUser() : 회원가입 성공");
+			return "회원가입 완료"; // redirect? or Status 200?
 		} else { // 회원가입 실패
-			return null; // 에러의 종류 반환
+			logger.warn("UserController.registerUser() : 회원가입 실패");
+			// 회원가입 실패의 이유를 받아야함
+			return null; // 에러의 종류 반환 or Status 반환?
 		}
 	}
 
 	@PostMapping("/user/login")
-	public String loginUser(@RequestBody UserDto userDto) { // Session 생성?
-		UserDto loginResult = userService.loginUser(userDto);
+	public String loginUser(@RequestBody UserSignUpDto userSignUpDto) { // Session 생성?
+		UserSignUpDto loginResult = userService.loginUser(userSignUpDto);
 		if (loginResult != null) { // 로그인 성공
 
 		} else { // 로그인 실패
