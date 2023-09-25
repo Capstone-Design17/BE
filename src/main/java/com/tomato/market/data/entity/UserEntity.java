@@ -29,7 +29,7 @@ public class UserEntity {
 	String pwd;
 	String realName;
 	String nickName;
-	Integer phone;
+	String phone;
 	String email;
 	Date birthday;
 	String lastLogin;
