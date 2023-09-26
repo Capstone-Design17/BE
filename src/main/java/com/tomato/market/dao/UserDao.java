@@ -9,10 +9,10 @@ public interface UserDao {
 
 	public boolean existsByEmail(String userEmail);
 
-	/*  ### 미구현 ###
-		아이디 중복 체크
-		핸드폰 중복 체크
-	 	넥네임 중복 체크
-	*/
+	public boolean existsById(String id);
+
+	public boolean existsByPhone(String phone);
+
+	/*  ### 미구현 ###	*/
 
 }

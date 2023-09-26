@@ -30,26 +30,37 @@ public class UserServiceImpl implements UserService {
 		// DTO -> Entity 전환
 		UserEntity userEntity = UserSignUpDto.toUserEntity(userSignUpDto);
 
-		// DAO 호출
+		// 중복 체크
 		if (!userDao.existsByEmail(userSignUpDto.getEmail())) { // 이메일 중복 체크
 			logger.info("UserServiceImpl.registerUser() : 이메일 중복 체크 성공");
-			// 닉네임 중복 체크
-			// 전화번호 중복 체크 // and로 중복 체크 묶기? // DAO로 예외처리 위임 불가능 -> DAO는 Register에 국한되지 않음
 		} else { // 이메일 중복
 			logger.warn("UserServiceImpl.registerUser() : 이메일 중복 체크 실패");
-			throw new UserException("중복된 이메일 입니다."); // 에러 리턴?
+			throw new UserException("이미 가입된 이메일 입니다.");
 		}
 
+		if (!userDao.existsById(userSignUpDto.getId())) {
+			logger.info("UserServiceImpl.registerUser() : 아이디 중복 체크 성공");
+		} else {
+			logger.warn("UserServiceImpl.registerUser() : 아이디 중복 체크 실패");
+			throw new UserException("이미 가입된 아이디 입니다.");
+		}
 
+		if (!userDao.existsByPhone(userSignUpDto.getPhone())) {
+			logger.info("UserServiceImpl.registerUser() : 전화번호 중복 체크 성공");
+		} else {
+			logger.warn("UserServiceImpl.registerUser() : 전화번호 중복 체크 실패");
+			throw new UserException("이미 가입된 전화번호 입니다.");
+		}
+
+		// 데이터 저장
 		logger.info("UserServiceImpl.registerUser() : 데이터 저장 시도");
 		UserEntity saveResult = userDao.save(userEntity);
 		if (saveResult != null) { // 저장 성공
 			logger.info("UserServiceImpl.registerUser() : 데이터 저장 성공");
-			// 저장 성공 결과 반환
-			return UserSignUpDto.toUserSignUpDto(saveResult); // 저장 성공을 어떻게 나타낼까
+			return UserSignUpDto.toUserSignUpDto(saveResult);
 		} else { // 저장 실패
 			logger.warn("UserServiceImpl.registerUser() : 데이터 저장 실패");
-			throw new UserException("데이터 저장에 실패했습니다."); // 에러 리턴?
+			throw new UserException("데이터 저장에 실패했습니다."); //
 		}
 	}
 

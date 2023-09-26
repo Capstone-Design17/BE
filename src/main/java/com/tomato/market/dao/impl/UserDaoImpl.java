@@ -43,12 +43,38 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public boolean existsByEmail(String userEmail) {
 		logger.info("UserDaoImpl.existsByEmail() is called");
-		boolean getUserEntity = userRepository.existsByEmail(userEmail); // 추후 이메일로 수정
+		boolean getUserEntity = userRepository.existsByEmail(userEmail);
 		if (getUserEntity) { // 이메일 찾음
-			logger.info("UserDaoImpl.existsByEmail() 존재하는 이메일 찾음");
+			logger.info("UserDaoImpl.existsByEmail() : 존재하는 이메일 찾음");
 			return true;
 		} else { // 이메일 못 찾음
-			logger.warn("UserDaoImpl.existsByEmail() 존재하는 이메일 찾지 못함");
+			logger.info("UserDaoImpl.existsByEmail() : 존재하는 이메일 찾지 못함");
+			return false;
+		}
+	}
+
+	@Override
+	public boolean existsById(String id) {
+		logger.info("UserDaoImpl.existsById() is called");
+		boolean getUserEntity = userRepository.existsById(id);
+		if (getUserEntity) {
+			logger.info("UserDaoImpl.existsById() : 존재하는 아이디 찾음");
+			return true;
+		} else {
+			logger.info("UserDaoImpl.existsById() : 존재하는 아이디를 찾지 못함");
+			return false;
+		}
+	}
+
+	@Override
+	public boolean existsByPhone(String phone) {
+		logger.info("UserDaoImpl.existsByPhone() is called");
+		boolean getUserEntity = userRepository.existsByPhone(phone);
+		if (getUserEntity) {
+			logger.info("UserDaoImpl.existsByPhone() : 존재하는 전화번호 찾음");
+			return true;
+		} else {
+			logger.info("UserDaoImpl.existsByPhone() : 존재하는 전화번호를 찾지 못함");
 			return false;
 		}
 	}
