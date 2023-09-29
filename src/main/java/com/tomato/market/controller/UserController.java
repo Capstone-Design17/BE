@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tomato.market.data.dto.UserResponseDto;
 import com.tomato.market.data.dto.UserSignUpDto;
+import com.tomato.market.handler.exception.UserException;
 import com.tomato.market.service.UserService;
 
 import jakarta.validation.Valid;
@@ -37,6 +38,13 @@ public class UserController {
 	public UserResponseDto registerUser(@RequestBody @Valid UserSignUpDto userSignUpDto) { // DTO로 Body값 받음, Valid로 검증
 		logger.info("UserController.registerUser() is called");
 		logger.info("UserController.registerUser() : Validation 오류 체크 성공");
+
+		// 비밀번호 확인
+		if (!userSignUpDto.getPwd().equals(userSignUpDto.getPwdCheck())) {
+			logger.info("UserController.registerUser() : 비밀번호 불일치");
+			throw new UserException("비밀번호가 일치하지 않습니다.");
+		}
+		logger.info("UserController.registerUser() : 비밀번호 일치 확인");
 
 		// User 저장
 		UserSignUpDto registerResult = userService.registerUser(userSignUpDto);

@@ -22,15 +22,18 @@ public class UserSignUpDto {
 	@Email(message = "잘못된 이메일 형식입니다.")
 	private String email;
 
-	@Pattern(message = "잘못된 아이디 형식입니다.", regexp = "^[a-z0-9_-]{3,10}")
+	@Pattern(message = "잘못된 아이디 형식입니다.", regexp = "^[a-z0-9_-]{6,20}")
 	private String id;
 
 	@Pattern(message = "잘못된 비밀번호 형식입니다.", regexp = "^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[$@$ !%*#?&])"
-		+ "[A-Za-z[0-9]$@$!%*#?&]{8,15}")
+		+ "[A-Za-z[0-9]$@$!%*#?&]{8,20}")
 	private String pwd;
 
 	// 비밀번호 확인
-	// private String pwdCheck;
+	@Pattern(message = "잘못된 비밀번호 형식입니다.", regexp = "^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[$@$ !%*#?&])"
+		+ "[A-Za-z[0-9]$@$!%*#?&]{8,20}")
+	private String pwdCheck;
+
 	@NotBlank(message = "이름을 입력하세요.")
 	private String realName;
 

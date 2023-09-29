@@ -45,6 +45,8 @@ public class UserControllerTest {
 	private String email = "test123@google.com";
 	private String id = "test123";
 	private String pwd = "test123!";
+
+	private String pwdCheck = "test123!";
 	private String realName = "testName";
 	private String nickName = "11111111";
 	private String phone = "01012345678";
@@ -68,6 +70,7 @@ public class UserControllerTest {
 			.email(email)
 			.id(id)
 			.pwd(pwd)
+			.pwdCheck(pwdCheck)
 			.realName(realName)
 			.nickName(nickName)
 			.phone(phone)
@@ -99,8 +102,6 @@ public class UserControllerTest {
 		verify(userService).registerUser(userSignUpDto);
 	}
 
-	// 비밀번호 입력-확인 테스트 필요
-
 	@Test
 	@DisplayName("이메일_형식_불일치")
 	void validationTest() throws Exception { // 입력값 형식 맞지 않음
@@ -117,6 +118,26 @@ public class UserControllerTest {
 			)
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message.email").exists()) // message: email: 존재
+			.andDo(print());
+	}
+
+
+	// 비밀번호 입력-확인 테스트 필요
+	@Test
+	@DisplayName("비밀번호_불일치")
+	void checkPasswordFail() throws Exception {
+		pwdCheck = pwd + "1"; // 비밀번호 확인 변경
+		userSignUpDto.setPwdCheck(pwdCheck);
+
+		content = new ObjectMapper().writeValueAsString(userSignUpDto);
+
+		mockMvc.perform(post("/api/user/register")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(content)
+				.accept(MediaType.APPLICATION_JSON)
+			)
+			.andExpect(status().isOk())
+			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"비밀번호가 일치하지 않습니다.\"}"))
 			.andDo(print());
 	}
 
