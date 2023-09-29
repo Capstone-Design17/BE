@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tomato.market.data.dto.UserResponseDto;
@@ -15,6 +16,7 @@ import com.tomato.market.service.UserService;
 import jakarta.validation.Valid;
 
 @RestController
+@RequestMapping("/api")
 public class UserController {
 	/*	회원가입
 	   	로그인

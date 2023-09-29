@@ -35,21 +35,21 @@ public class UserServiceImpl implements UserService {
 			logger.info("UserServiceImpl.registerUser() : 이메일 중복 체크 성공");
 		} else { // 이메일 중복
 			logger.warn("UserServiceImpl.registerUser() : 이메일 중복 체크 실패");
-			throw new UserException("이미 가입된 이메일 입니다.");
+			throw new UserException("이미 가입된 이메일입니다.");
 		}
 
 		if (!userDao.existsById(userSignUpDto.getId())) {
 			logger.info("UserServiceImpl.registerUser() : 아이디 중복 체크 성공");
 		} else {
 			logger.warn("UserServiceImpl.registerUser() : 아이디 중복 체크 실패");
-			throw new UserException("이미 가입된 아이디 입니다.");
+			throw new UserException("이미 가입된 아이디입니다.");
 		}
 
 		if (!userDao.existsByPhone(userSignUpDto.getPhone())) {
 			logger.info("UserServiceImpl.registerUser() : 전화번호 중복 체크 성공");
 		} else {
 			logger.warn("UserServiceImpl.registerUser() : 전화번호 중복 체크 실패");
-			throw new UserException("이미 가입된 전화번호 입니다.");
+			throw new UserException("이미 가입된 전화번호입니다.");
 		}
 
 		// 데이터 저장

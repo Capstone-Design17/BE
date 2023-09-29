@@ -25,10 +25,12 @@ public class UserSignUpDto {
 	@Pattern(message = "잘못된 아이디 형식입니다.", regexp = "^[a-z0-9_-]{3,10}")
 	private String id;
 
-	@Pattern(message = "Invalid password format.", regexp = "^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[$@$ !%*#?&])"
+	@Pattern(message = "잘못된 비밀번호 형식입니다.", regexp = "^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[$@$ !%*#?&])"
 		+ "[A-Za-z[0-9]$@$!%*#?&]{8,15}")
 	private String pwd;
 
+	// 비밀번호 확인
+	// private String pwdCheck;
 	@NotBlank(message = "이름을 입력하세요.")
 	private String realName;
 

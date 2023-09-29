@@ -17,7 +17,8 @@ public class HelloControllerTest {
 
 	@Test
 	void getHelloTest() throws Exception {
-		mockMvc.perform(get("/hello")).andExpect(status().isOk()).andDo(print());
+		// given()으로 Service 계층의 결과값을 만들어줌
+		mockMvc.perform(get("/api/hello")).andExpect(status().isOk()).andDo(print());
 	}
 
 }
