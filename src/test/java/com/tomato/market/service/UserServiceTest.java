@@ -24,14 +24,14 @@ public class UserServiceTest {
 	@Mock
 	UserDaoImpl userDao;
 
-	private String email = "test123@google.com";
-	private String id = "test123";
-	private String pwd = "test123!";
-	private String realName = "testName";
-	private String nickName = "11111111";
+	private String email = "daejin@daejin.ac.kr";
+	private String id = "spring";
+	private String pwd = "spring@123";
+	private String name = "홍길동";
+	private String nickName = "nick";
 	private String phone = "01012345678";
 	private Integer status = 0;
-	private Date birthday;
+	private Date birth;
 	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
 
@@ -41,16 +41,16 @@ public class UserServiceTest {
 	@BeforeEach
 	void setUp() throws ParseException {
 		// DTO 받음
-		birthday = formatter.parse("2023/09/27 01:25:27");
+		birth = formatter.parse("2023/09/27 01:25:27");
 		userSignUpDto = UserSignUpDto.builder()
 			.email(email)
 			.id(id)
 			.pwd(pwd)
-			.realName(realName)
+			.name(name)
 			.nickName(nickName)
 			.phone(phone)
 			.status(status)
-			.birthday(birthday)
+			.birth(birth)
 			.build();
 
 		// Entity 변환

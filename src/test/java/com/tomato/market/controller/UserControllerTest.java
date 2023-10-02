@@ -42,13 +42,12 @@ public class UserControllerTest {
 	@MockBean
 	private UserServiceImpl userService;
 
-	private String email = "test123@google.com";
-	private String id = "test123";
-	private String pwd = "test123!";
-
-	private String pwdCheck = "test123!";
-	private String name = "testName";
-	private String nickName = "11111111";
+	private String email = "daejin@daejin.ac.kr";
+	private String id = "spring";
+	private String pwd = "spring@123";
+	private String pwdCheck = "spring@123";
+	private String name = "홍길동";
+	private String nickName = "nick";
 	private String phone = "01012345678";
 	private Integer status = 0;
 	private Date birth;
