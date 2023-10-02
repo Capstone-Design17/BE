@@ -14,6 +14,7 @@ public class HelloController {
 
 	private final Logger logger = LoggerFactory.getLogger(HelloController.class);
 
+
 //	private HelloService helloService;
 
 //	@Autowired
@@ -30,12 +31,14 @@ public class HelloController {
 		HelloDto helloDto = new HelloDto("Hello", "world");
 
 		// 저장 로직
+
 //		String save = helloService.saveHello(helloDto).toString();
 //		logger.info("save: " + save);
 
 		// 조회 로직
 //		String get = helloService.getHello("Hello").toString();
 //		logger.info("get: " + get);
+
 		return "Hello World!";
 	}
 }
