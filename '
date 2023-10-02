@@ -1,0 +1,11 @@
+[tomato-market/plan#12] 비밀번호 일치 확인 
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch feature/12_sign_up
+# Changes to be committed:
+#	new file:   src/main/java/com/tomato/market/config/WebConfig.java
+#	modified:   src/main/java/com/tomato/market/controller/UserController.java
+#	modified:   src/main/java/com/tomato/market/data/dto/UserSignUpDto.java
+#	modified:   src/test/java/com/tomato/market/controller/UserControllerTest.java
+#

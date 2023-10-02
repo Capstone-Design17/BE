@@ -47,11 +47,11 @@ public class UserControllerTest {
 	private String pwd = "test123!";
 
 	private String pwdCheck = "test123!";
-	private String realName = "testName";
+	private String name = "testName";
 	private String nickName = "11111111";
 	private String phone = "01012345678";
 	private Integer status = 0;
-	private Date birthday;
+	private Date birth;
 	private UserSignUpDto userSignUpDto;
 	private String content = "";
 	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -61,7 +61,7 @@ public class UserControllerTest {
 
 	@BeforeEach
 	void setup() throws ParseException {
-		birthday = formatter.parse("2023/09/27 01:25:27");
+		birth = formatter.parse("2023/09/27 01:25:27");
 		mockMvc = MockMvcBuilders.webAppContextSetup(ctx)
 			.addFilters(new CharacterEncodingFilter("UTF-8", true))  // 한글 깨짐 처리
 			.build();
@@ -71,11 +71,11 @@ public class UserControllerTest {
 			.id(id)
 			.pwd(pwd)
 			.pwdCheck(pwdCheck)
-			.realName(realName)
+			.name(name)
 			.nickName(nickName)
 			.phone(phone)
 			.status(status)
-			.birthday(birthday)
+			.birth(birth)
 			.build();
 	}
 
