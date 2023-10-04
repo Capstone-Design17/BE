@@ -1,5 +1,6 @@
 package com.tomato.market.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -16,8 +17,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.tomato.market.dao.impl.UserDaoImpl;
+import com.tomato.market.data.dto.UserLoginDto;
 import com.tomato.market.data.dto.UserSignUpDto;
 import com.tomato.market.data.entity.UserEntity;
+import com.tomato.market.handler.exception.UserException;
+import com.tomato.market.service.impl.UserServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -37,11 +41,15 @@ public class UserServiceTest {
 
 	private UserSignUpDto userSignUpDto;
 	private UserEntity userEntity;
+	private UserLoginDto userLoginDto;
+
 
 	@BeforeEach
 	void setUp() throws ParseException {
 		// DTO 받음
 		birth = formatter.parse("2023/09/27 01:25:27");
+
+		// 회원가입용 DTO
 		userSignUpDto = UserSignUpDto.builder()
 			.email(email)
 			.id(id)
@@ -55,88 +63,154 @@ public class UserServiceTest {
 
 		// Entity 변환
 		userEntity = UserSignUpDto.toUserEntity(userSignUpDto);
+
+		// 로그인용 DTO
+		userLoginDto = UserLoginDto.builder()
+			.id(id)
+			.pwd(pwd)
+			.build();
 	}
 
 	@Test
 	@DisplayName("회원가입_성공")
 	void registerUserSuccess() {
 		// Entity를 DAO에 전달, 중복 체크 성공한 상황 가정
-		given(userDao.existsByEmail(userEntity.getEmail())).willReturn(true);
-		given(userDao.existsById(userEntity.getId())).willReturn(true);
-		given(userDao.existsByPhone(userEntity.getPhone())).willReturn(true);
-		given(userDao.save(userEntity)).willReturn(userEntity);
+		given(userDao.existsByEmail(userEntity.getEmail())).willReturn(false);
+		given(userDao.existsById(userEntity.getId())).willReturn(false);
+		given(userDao.existsByPhone(userEntity.getPhone())).willReturn(false);
+		given(userDao.save(any(UserEntity.class))).willReturn(userEntity);
 
-		// 중복 체크
-		Assertions.assertTrue(userDao.existsByEmail(userEntity.getEmail()));
-		Assertions.assertTrue(userDao.existsById(userEntity.getId()));
-		Assertions.assertTrue(userDao.existsByPhone(userEntity.getPhone()));
-		Assertions.assertEquals(userDao.save(userEntity), userEntity);
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		// 중복 체크 후 UserEntity -> UserSignUpDto로 변환하여 리턴할 것
+		Assertions.assertEquals(userService.registerUser(userSignUpDto), UserSignUpDto.toUserSignUpDto(userEntity));
 
 		//
 		verify(userDao).existsByEmail(userEntity.getEmail());
 		verify(userDao).existsById(userEntity.getId());
 		verify(userDao).existsByPhone(userEntity.getPhone());
-		verify(userDao).save(userEntity);
+		verify(userDao).save(any(UserEntity.class));
 	}
 
 	@Test
-	@DisplayName("회원가입_실패")
+	@DisplayName("회원가입_데이터_저장_실패")
 	void registerUserFail() {
 		// Entity를 DAO에 전달, 중복 체크 성공한 상황 가정
-		given(userDao.existsByEmail(userEntity.getEmail())).willReturn(true);
-		given(userDao.existsById(userEntity.getId())).willReturn(true);
-		given(userDao.existsByPhone(userEntity.getPhone())).willReturn(true);
-		given(userDao.save(userEntity)).willReturn(null);
+		given(userDao.existsByEmail(userEntity.getEmail())).willReturn(false);
+		given(userDao.existsById(userEntity.getId())).willReturn(false);
+		given(userDao.existsByPhone(userEntity.getPhone())).willReturn(false);
+		given(userDao.save(any(UserEntity.class))).willReturn(null);
 
-		// 중복 체크
-		Assertions.assertTrue(userDao.existsByEmail(userEntity.getEmail()));
-		Assertions.assertTrue(userDao.existsById(userEntity.getId()));
-		Assertions.assertTrue(userDao.existsByPhone(userEntity.getPhone()));
-		Assertions.assertNull(userDao.save(userEntity));
+		// 여기서부터
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+
+		// 예외를 던지는지 확인
+		UserException exception = Assertions.assertThrows(UserException.class, () -> {
+			userService.registerUser(userSignUpDto);
+		});
+		Assertions.assertEquals(exception.getMessage(), "데이터 저장에 실패했습니다.");
 
 		//
 		verify(userDao).existsByEmail(userEntity.getEmail());
 		verify(userDao).existsById(userEntity.getId());
 		verify(userDao).existsByPhone(userEntity.getPhone());
-		verify(userDao).save(userEntity);
+		verify(userDao).save(any(UserEntity.class));
 	}
 
 	@Test
-	@DisplayName("이메일_중복")
+	@DisplayName("회원가입_이메일_중복")
 	void duplicatedEmail() {
-		given(userDao.existsByEmail(userEntity.getEmail())).willReturn(false);
+		given(userDao.existsByEmail(userEntity.getEmail())).willReturn(true);
 
-		Assertions.assertFalse(userDao.existsByEmail(userEntity.getEmail()));
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		UserException exception = Assertions.assertThrows(UserException.class, () -> {
+			userService.registerUser(userSignUpDto);
+		});
+		Assertions.assertEquals(exception.getMessage(), "이미 가입된 이메일입니다.");
 
 		verify(userDao).existsByEmail(userEntity.getEmail());
 	}
 
 	@Test
-	@DisplayName("아이디_중복")
+	@DisplayName("회원가입_아이디_중복")
 	void duplicatedId() {
-		given(userDao.existsByEmail(userEntity.getEmail())).willReturn(true);
-		given(userDao.existsById(userEntity.getId())).willReturn(false);
+		given(userDao.existsByEmail(userEntity.getEmail())).willReturn(false);
+		given(userDao.existsById(userEntity.getId())).willReturn(true);
 
-		Assertions.assertTrue(userDao.existsByEmail(userEntity.getEmail()));
-		Assertions.assertFalse(userDao.existsById(userEntity.getId()));
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		UserException exception = Assertions.assertThrows(UserException.class, () -> {
+			userService.registerUser(userSignUpDto);
+		});
+		Assertions.assertEquals(exception.getMessage(), "이미 가입된 아이디입니다.");
 
 		verify(userDao).existsByEmail(userEntity.getEmail());
 		verify(userDao).existsById(userEntity.getId());
 	}
 
 	@Test
-	@DisplayName("전화번호_중복")
+	@DisplayName("회원가입_전화번호_중복")
 	void duplicatedPhone() {
-		given(userDao.existsByEmail(userEntity.getEmail())).willReturn(true);
-		given(userDao.existsById(userEntity.getId())).willReturn(true);
-		given(userDao.existsByPhone(userEntity.getPhone())).willReturn(false);
+		given(userDao.existsByEmail(userEntity.getEmail())).willReturn(false);
+		given(userDao.existsById(userEntity.getId())).willReturn(false);
+		given(userDao.existsByPhone(userEntity.getPhone())).willReturn(true);
 
-		Assertions.assertTrue(userDao.existsByEmail(userEntity.getEmail()));
-		Assertions.assertTrue(userDao.existsById(userEntity.getId()));
-		Assertions.assertFalse(userDao.existsByPhone(userEntity.getPhone()));
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		UserException exception = Assertions.assertThrows(UserException.class, () -> {
+			userService.registerUser(userSignUpDto);
+		});
+		Assertions.assertEquals(exception.getMessage(), "이미 가입된 전화번호입니다.");
 
 		verify(userDao).existsByEmail(userEntity.getEmail());
 		verify(userDao).existsById(userEntity.getId());
 		verify(userDao).existsByPhone(userEntity.getPhone());
+	}
+
+	@Test
+	@DisplayName("로그인_성공")
+	void loginUserSuccess() {
+		// 확안용 UserEntity 사용
+		given(userDao.get(userLoginDto.getId())).willReturn(userEntity);
+
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		UserLoginDto result = userService.loginUser(userLoginDto);
+
+		// id로 있는 User인지 조회, 비밀번호 일치 확인
+		Assertions.assertEquals(result, UserLoginDto.toUserLoginDto(userEntity));
+
+		verify(userDao).get(userLoginDto.getId());
+	}
+
+
+	@Test
+	@DisplayName("로그인_아이디_조회_실패")
+	void loginUserIdFail() {
+		given(userDao.get(userLoginDto.getId())).willReturn(null);
+
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		UserException exception = Assertions.assertThrows(UserException.class, () -> {
+			userService.loginUser(userLoginDto);
+		});
+		Assertions.assertEquals(exception.getMessage(), "등록되지 않은 아이디입니다.");
+
+		verify(userDao).get(userLoginDto.getId());
+	}
+
+	@Test
+	@DisplayName("로그인_비밀번호_확인_실패")
+	void loginUserPwdFail() {
+		// 아이디가 저장된 상황 가정
+		given(userDao.get(userLoginDto.getId())).willReturn(userEntity);
+
+		// 비밀번호 불일치 가정
+		userLoginDto.setPwd(userLoginDto.getPwd() + 1);
+
+		// 행위
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		UserException exception = Assertions.assertThrows(UserException.class, () -> {
+			userService.loginUser(userLoginDto);
+		});
+		Assertions.assertEquals(exception.getMessage(), "비밀번호가 일치하지 않습니다.");
+
+		// 검증
+		verify(userDao).get(userLoginDto.getId());
 	}
 }

@@ -25,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tomato.market.data.dto.UserLoginDto;
 import com.tomato.market.data.dto.UserSignUpDto;
 import com.tomato.market.handler.exception.UserException;
 import com.tomato.market.service.impl.UserServiceImpl;
@@ -55,6 +56,9 @@ public class UserControllerTest {
 	private String content = "";
 	private SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
+	private UserLoginDto userLoginDto;
+	private String loginContent = "";
+
 	@Autowired
 	private WebApplicationContext ctx; // 인코딩
 
@@ -65,6 +69,7 @@ public class UserControllerTest {
 			.addFilters(new CharacterEncodingFilter("UTF-8", true))  // 한글 깨짐 처리
 			.build();
 
+		// 회원가입용 객체
 		userSignUpDto = UserSignUpDto.builder()
 			.email(email)
 			.id(id)
@@ -75,6 +80,12 @@ public class UserControllerTest {
 			.phone(phone)
 			.status(status)
 			.birth(birth)
+			.build();
+
+		// 로그인용 객체
+		userLoginDto = UserLoginDto.builder()
+			.id(id)
+			.pwd(pwd)
 			.build();
 	}
 
@@ -102,7 +113,7 @@ public class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("이메일_형식_불일치")
+	@DisplayName("회원가입_이메일_형식_불일치")
 	void validationTest() throws Exception { // 입력값 형식 맞지 않음
 		// content의 입력값을 일부러 맞지 않도록 설정
 		email = "1";
@@ -123,7 +134,7 @@ public class UserControllerTest {
 
 	// 비밀번호 입력-확인 테스트 필요
 	@Test
-	@DisplayName("비밀번호_불일치")
+	@DisplayName("회원가입_비밀번호_불일치")
 	void checkPasswordFail() throws Exception {
 		pwdCheck = pwd + "1"; // 비밀번호 확인 변경
 		userSignUpDto.setPwdCheck(pwdCheck);
@@ -141,7 +152,7 @@ public class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("이메일_중복")
+	@DisplayName("회원가입_이메일_중복")
 	void duplicatedEmailException() throws Exception { // 이메일 중복
 		// 이미 같은 이메일이 저장되어있는 상황을 가정
 		given(userService.registerUser(userSignUpDto)).willThrow(new UserException("이미 가입된 이메일입니다."));
@@ -161,7 +172,7 @@ public class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("아이디_중복")
+	@DisplayName("회원가입_아이디_중복")
 	void duplicatedIdException() throws Exception { // 아이디 중복
 		// 이미 같은 아이디가 저장되어있는 상황을 가정
 		given(userService.registerUser(userSignUpDto)).willThrow(new UserException("이미 가입된 아이디입니다."));
@@ -181,7 +192,7 @@ public class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("전화번호_중복")
+	@DisplayName("회원가입_전화번호_중복")
 	void duplicatedPhoneException() throws Exception { // 전화번호 중복
 		// 이미 같은 전화번호가 저장되어있는 상황을 가정
 		given(userService.registerUser(userSignUpDto)).willThrow(new UserException("이미 가입된 전화번호입니다."));
@@ -199,4 +210,84 @@ public class UserControllerTest {
 
 		verify(userService).registerUser(userSignUpDto);
 	}
+
+	@Test
+	@DisplayName("로그인_성공")
+	void loginUserSuccess() throws Exception {
+		given(userService.loginUser(userLoginDto)).willReturn(userLoginDto);
+
+		// View로부터 로그인 개체 받기
+		loginContent = new ObjectMapper().writeValueAsString(userLoginDto);
+
+		//
+		mockMvc.perform(post("/api/user/login")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(loginContent)
+				.accept(MediaType.APPLICATION_JSON)
+			)
+			.andExpect(status().isOk())
+			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"로그인 성공\"}"))
+			.andDo(print());
+
+		verify(userService).loginUser(userLoginDto);
+	}
+
+	@Test
+	@DisplayName("로그인_형식_불일치")
+	void loginValidation() throws Exception {
+		// 아이디 형식 불일치 가정
+		userLoginDto.setId("sp");
+
+		loginContent = new ObjectMapper().writeValueAsString(userLoginDto);
+
+		mockMvc.perform(post("/api/user/login")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(loginContent)
+				.accept(MediaType.APPLICATION_JSON)
+			).andExpect(status().isOk())
+			.andExpect(jsonPath("$.message.id").exists()) // message: email: 존재
+			.andDo(print());
+	}
+
+	@Test
+	@DisplayName("로그인_아이디_조회_실패")
+	void loginIdFail() throws Exception {
+		given(userService.loginUser(userLoginDto)).willThrow(new UserException("등록되지 않은 아이디입니다."));
+
+		loginContent = new ObjectMapper().writeValueAsString(userLoginDto);
+
+		mockMvc.perform(post("/api/user/login")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(loginContent)
+				.accept(MediaType.APPLICATION_JSON)
+			)
+			.andExpect(status().isOk())
+			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"등록되지 않은 아이디입니다.\"}"))
+			.andDo(print());
+
+		verify(userService).loginUser(userLoginDto);
+	}
+
+	@Test
+	@DisplayName("로그인_비밀번호_불일치")
+	void loginPwdFail() throws Exception {
+		given(userService.loginUser(userLoginDto)).willThrow(new UserException("비밀번호가 일치하지 않습니다."));
+
+		// 비밀번호 불일치 설정
+		userLoginDto.setPwd(userLoginDto.getPwd() + 1);
+
+		loginContent = new ObjectMapper().writeValueAsString(userLoginDto);
+
+		mockMvc.perform(post("/api/user/login")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(loginContent)
+				.accept(MediaType.APPLICATION_JSON)
+			)
+			.andExpect(status().isOk())
+			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"비밀번호가 일치하지 않습니다.\"}"))
+			.andDo(print());
+
+		verify(userService).loginUser(userLoginDto);
+	}
+
 }

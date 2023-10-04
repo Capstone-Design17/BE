@@ -73,9 +73,8 @@ public class UserController {
 		if (loginResult != null) { // 로그인 성공
 			// 세션에 값 저장 : 세션의 담을 데이터의 범위는 어디까지?
 			session.setAttribute("userId", loginResult.getId()); // 세션 구분은 sessionId로 하는듯?
-		} else { // 로그인 실패
-			// Response 응답 : 실패
-			return UserResponseDto.builder().status(HttpStatus.OK).message("로그인 실패 : ").build(); // 로그인 실패 정보 담기
+			// 세션을 Redis에 저장?
+			// 어떻게 저장하고 접근하는지?
 		}
 
 		// 로그인 성공 응답 반환
