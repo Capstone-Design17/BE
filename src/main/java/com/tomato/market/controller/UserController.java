@@ -75,10 +75,13 @@ public class UserController {
 			session.setAttribute("userId", loginResult.getId()); // 세션 구분은 sessionId로 하는듯?
 			// 세션을 Redis에 저장?
 			// 어떻게 저장하고 접근하는지?
+			logger.info("UserController.loginUser() : 세션 아이디-" + session.getId());
+			logger.info("UserController.loginUser() : 세션 값-" + session.getAttribute("userId"));
 		}
 
 		// 로그인 성공 응답 반환
 		// Redirect는 React에서 할 예정
+		logger.info("UserController.loginUser() : 로그인 성공");
 		return UserResponseDto.builder().status(HttpStatus.OK).message("로그인 성공").build();
 	}
 }
