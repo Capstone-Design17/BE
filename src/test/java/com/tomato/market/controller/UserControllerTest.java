@@ -2,6 +2,7 @@ package com.tomato.market.controller;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -290,4 +292,24 @@ public class UserControllerTest {
 		verify(userService).loginUser(userLoginDto);
 	}
 
+	@Test
+	@DisplayName("로그인_세션_존재")
+	void existSession() throws Exception {
+		MockHttpSession session = new MockHttpSession();
+		session.setAttribute("userId", id);
+		mockMvc.perform(get("/api/user/getSession").session(session))
+			.andExpect(status().isOk())
+			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"" + session.getAttribute("userId") + "\"}"))
+			.andDo(print());
+	}
+
+	@Test
+	@DisplayName("로그인_세션_없음")
+	void nonExistSession() throws Exception {
+		MockHttpSession session = new MockHttpSession();
+		mockMvc.perform(get("/api/user/getSession").session(session))
+			.andExpect(status().isOk())
+			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"로그인이 필요합니다.\"}"))
+			.andDo(print());
+	}
 }
