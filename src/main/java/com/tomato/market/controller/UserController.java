@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -83,5 +84,28 @@ public class UserController {
 		// Redirect는 React에서 할 예정
 		logger.info("UserController.loginUser() : 로그인 성공");
 		return UserResponseDto.builder().status(HttpStatus.OK).message("로그인 성공").build();
+	}
+
+	@GetMapping("/user/getSession")
+	public UserResponseDto getUser(HttpSession session) { // 리턴 타입 변경해야할 가능성 있음
+		logger.info("UserController.getUser() is called");
+		// 세션을 확인
+		logger.info("UserController.getUser() : 세션 아이디-" + session.getId());
+		logger.info("UserController.getUser() : 세션 값-" + session.getAttribute("userId"));
+
+		if (session.getAttribute("userId") == null) { // 세션이 없는 경우
+			logger.warn("UserController.getUser() : 세션에 userId가 없음");
+			throw new UserException("로그인이 필요합니다."); // 예외를 던지기
+			// React에서 로그인 페이지로 Redirect
+		}
+
+		// 세션이 있는 경우
+		logger.info("UserController.getUser() : 세션에 userId가 있음");
+
+		// (임시) 세션의 User ID를 리턴
+		return UserResponseDto.builder()
+			.status(HttpStatus.OK)
+			.message(session.getAttribute("userId"))
+			.build();
 	}
 }
