@@ -199,4 +199,14 @@ public class UserControllerTest {
 
 		verify(userService).registerUser(userSignUpDto);
 	}
+
+	@Test
+	@DisplayName("로그아웃_성공")
+	void logout() throws Exception {
+		mockMvc.perform(post("/api/user/logout"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"로그아웃 되었습니다.\"}"))
+			.andDo(print());
+
+	}
 }
