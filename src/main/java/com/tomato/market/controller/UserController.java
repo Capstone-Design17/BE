@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +14,7 @@ import com.tomato.market.data.dto.UserSignUpDto;
 import com.tomato.market.handler.exception.UserException;
 import com.tomato.market.service.UserService;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 @RestController
@@ -68,7 +68,17 @@ public class UserController {
 		return "로그인 성공"; // responseDto 반환할 것
 	}
 
-	@DeleteMapping("user/logout")
-	public void logout() {
+	@PostMapping("/user/logout")
+	public UserResponseDto logout(HttpSession session) {
+		logger.info("UserController.logout() is called");
+		logger.info("UserController.logout() 세션 아이디 : " + session.getId());
+
+		// 세션 무효
+		session.invalidate(); // 값을 무효화?(초기화?)
+
+		return UserResponseDto.builder()
+			.status(HttpStatus.OK)
+			.message("로그아웃 되었습니다.")
+			.build();
 	}
 }
