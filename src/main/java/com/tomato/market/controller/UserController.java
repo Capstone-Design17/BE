@@ -108,4 +108,19 @@ public class UserController {
 			.message(session.getAttribute("userId"))
 			.build();
 	}
+
+	@PostMapping("/user/logout")
+	public UserResponseDto logout(HttpSession session) {
+		logger.info("UserController.logout() is called");
+		logger.info("UserController.logout() 세션 아이디 : " + session.getId());
+
+		// 세션 무효
+		session.invalidate(); // 값을 무효화?(초기화?)
+		logger.info("UserController.logout() : 세션 invalidate");
+
+		return UserResponseDto.builder()
+			.status(HttpStatus.OK)
+			.message("로그아웃 되었습니다.")
+			.build();
+	}
 }

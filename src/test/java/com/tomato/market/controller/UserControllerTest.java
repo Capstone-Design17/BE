@@ -213,7 +213,6 @@ public class UserControllerTest {
 		verify(userService).registerUser(userSignUpDto);
 	}
 
-	@Test
 	@DisplayName("로그인_성공")
 	void loginUserSuccess() throws Exception {
 		given(userService.loginUser(userLoginDto)).willReturn(userLoginDto);
@@ -310,6 +309,15 @@ public class UserControllerTest {
 		mockMvc.perform(get("/api/user/getSession").session(session))
 			.andExpect(status().isOk())
 			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"로그인이 필요합니다.\"}"))
+			.andDo(print());
+	}
+
+	@Test
+	@DisplayName("로그아웃_성공")
+	void logout() throws Exception {
+		mockMvc.perform(post("/api/user/logout"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"로그아웃 되었습니다.\"}"))
 			.andDo(print());
 	}
 }
