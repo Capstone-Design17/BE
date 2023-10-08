@@ -1,5 +1,7 @@
 package com.tomato.market.dao.impl;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,17 +29,28 @@ public class UserDaoImpl implements UserDao {
 
 		// 저장 실패 체크 // null 반환 말고 다른거로 반환?
 		if (savedUserEntity.getEmail() != null) { // 저장 성공
-			logger.info("UserDaoImpl.save() 저장 성공");
+			logger.info("UserDaoImpl.save() : 저장 성공");
 			return savedUserEntity;
 		} else { // 저장 실패
-			logger.warn("UserDaoImpl.save() 저장 실패");
+			logger.warn("UserDaoImpl.save() : 저장 실패");
 			return null;
 		}
 	}
 
 	@Override
-	public UserEntity get(UserEntity userEntity) {
-		return null;
+	public UserEntity get(String id) {
+		logger.info("UserDaoImpl.get() is called");
+
+		// ID로 User 조회
+		Optional<UserEntity> userEntity = userRepository.findById(id);
+
+		if (userEntity.isPresent()) { // 객체가 존재하면
+			logger.info("UserDaoImpl.get() : User 정보 조회 성공");
+			return userEntity.get(); // Optional 내부의 객체를 반환
+		} else {
+			logger.warn("UserDaoImpl.get() : User 정보 조회 실패");
+			return null;
+		}
 	}
 
 	@Override
