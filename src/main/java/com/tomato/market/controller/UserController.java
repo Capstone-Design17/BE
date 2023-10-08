@@ -116,6 +116,7 @@ public class UserController {
 
 		// 세션 무효
 		session.invalidate(); // 값을 무효화?(초기화?)
+		logger.info("UserController.logout() : 세션 invalidate");
 
 		return UserResponseDto.builder()
 			.status(HttpStatus.OK)
