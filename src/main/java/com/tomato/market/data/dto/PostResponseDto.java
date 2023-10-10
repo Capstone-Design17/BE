@@ -15,5 +15,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PostResponseDto {
 	HttpStatus status;
-	String message;
+	Object message;
 }

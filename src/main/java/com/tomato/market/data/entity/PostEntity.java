@@ -27,7 +27,7 @@ public class PostEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Integer postNum;
-	Integer userNum; // 관계를 가지는 키 값을 어떻게 구축?
+	String userId; // 관계를 가지는 키 값을 어떻게 구축?
 	String location;
 	String title;
 	String category;
@@ -37,5 +37,5 @@ public class PostEntity {
 	Integer status;
 	@CreatedDate
 	Date createdAt; // 애노테이션?
-	Integer boughtUser;
+	Integer boughtUserId;
 }

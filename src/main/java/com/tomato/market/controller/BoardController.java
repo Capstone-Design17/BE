@@ -22,6 +22,8 @@ import com.tomato.market.data.dto.PostListResponseDto;
 import com.tomato.market.data.dto.PostResponseDto;
 import com.tomato.market.service.BoardService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api")
 public class BoardController {
@@ -41,17 +43,22 @@ public class BoardController {
 	@PostMapping(value = "/board/writePost", consumes = {MediaType.APPLICATION_JSON_VALUE,
 		MediaType.MULTIPART_FORM_DATA_VALUE})
 	public PostResponseDto writePost(
-		@RequestPart("postDto") PostDto postDto, @RequestPart("files") MultipartFile[] files)
+		@RequestPart("postDto") @Valid PostDto postDto,
+		@RequestPart(value = "files", required = false) MultipartFile[] files)
 		throws IOException { // 추후 @Valid // 이미지도 받아와야 함
 		logger.info("BoardController.registerPost() is called");
+		logger.info("BoardController.registerPost() : Validation 검증 성공");
 
 		// 게시글 등록
 		boardService.writePost(postDto);
 		logger.info("BoardController.registerPost() : 게시글 저장 성공");
 
-		// postID와 연관하여 이미지 등록 // Image API를 따로 분리? : DB간 관계가 성립되지 않는 문제 있음
-		boardService.uploadImages(files);
-		logger.info("BoardController.registerPost() : 이미지 저장 성공");
+		if (files != null) {
+			logger.info("BoardController.registerPost() : 이미지가 존재하는 Post");
+			// postID와 연관하여 이미지 등록 // Image API를 따로 분리? : DB간 관계가 성립되지 않는 문제 있음
+			boardService.uploadImages(files);
+			logger.info("BoardController.registerPost() : 이미지 저장 성공");
+		}
 
 		// 결과 리턴
 		return PostResponseDto.builder()
@@ -59,6 +66,9 @@ public class BoardController {
 			.message("게시글 등록에 성공했습니다.")
 			.build();
 	}
+
+//	PutMapping?
+//	updatePost() {}
 
 
 	@GetMapping("/board/getPostList")

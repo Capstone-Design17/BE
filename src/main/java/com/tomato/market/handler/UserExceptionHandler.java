@@ -9,10 +9,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.tomato.market.controller.UserController;
 import com.tomato.market.data.dto.UserResponseDto;
 import com.tomato.market.handler.exception.UserException;
 
-@RestControllerAdvice
+@RestControllerAdvice(basePackageClasses = UserController.class)
 public class UserExceptionHandler {
 
 	private final Logger logger = LoggerFactory.getLogger(UserExceptionHandler.class);
