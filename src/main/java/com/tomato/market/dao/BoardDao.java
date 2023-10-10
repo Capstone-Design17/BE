@@ -8,8 +8,10 @@ import com.tomato.market.data.entity.PostEntity;
 public interface BoardDao {
 	PostEntity save(PostEntity postEntity);
 
+	ImageEntity saveImage(ImageEntity imageEntity);
+
 	List<PostEntity> findPostList();
 
-	ImageEntity findImageByPostId(String postId);
+	ImageEntity findImageByPostNum(Integer postNum);
 
 }

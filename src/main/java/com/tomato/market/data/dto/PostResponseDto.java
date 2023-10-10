@@ -1,5 +1,7 @@
 package com.tomato.market.data.dto;
 
+import org.springframework.http.HttpStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,5 +13,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResponsePostDto {
+public class PostResponseDto {
+	HttpStatus status;
+	String message;
 }
