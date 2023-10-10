@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +26,9 @@ public class BoardServiceImpl implements BoardService {
 	private final Logger logger = LoggerFactory.getLogger(BoardServiceImpl.class);
 
 	private final BoardDao boardDao;
+
+	@Value("${image.path}")
+	private String projectPath; // 이미지 경로 얻기 : profile
 
 	@Autowired
 	public BoardServiceImpl(BoardDao boardDao) {
@@ -54,7 +58,6 @@ public class BoardServiceImpl implements BoardService {
 	public void uploadImages(MultipartFile[] files) { // 이미지 업로드
 		logger.info("BoardServiceImpl.uploadImages() is called");
 		//유
-		String projectPath = "C:/Users/dksgu/Desktop/캡스톤디자인/images/"; // 프로젝트 경로 얻기 : 변동 여지 있음 profile?
 		for (int i = 0; i < files.length; i++) {
 			logger.info("BoardServiceImpl.uploadImages() : 이미지" + (i + 1) + " 저장 시도");
 			MultipartFile file = files[i];
@@ -67,6 +70,7 @@ public class BoardServiceImpl implements BoardService {
 				file.transferTo(savedFile);
 			} catch (Exception e) {
 				logger.warn("BoardServiceImpl.uploadImages() : 파일 저장 실패");
+				e.printStackTrace();
 				throw new BoardException((i + 1) + "번째 파일 저장에 실패했습니다.");
 			}
 
