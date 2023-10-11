@@ -29,7 +29,8 @@ public class BoardExceptionHandler {
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public PostResponseDto handlePostValidation(MethodArgumentNotValidException exception) {
-		logger.warn("BoardExceptionHandler.handlePostValidation() is called");
+		logger.info("BoardExceptionHandler.handlePostValidation() is called");
+		logger.warn("BoardExceptionHandler.handlePostValidation() : Validation 오류, 데이터 형식이 올바르지 않음");
 
 		// Validation 에러 맵
 		HashMap<String, String> validationErrorMap = new HashMap<>();

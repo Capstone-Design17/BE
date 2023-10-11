@@ -36,6 +36,7 @@ public class UserExceptionHandler {
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public UserResponseDto handleUserValidation(MethodArgumentNotValidException exception) {
+		logger.info("UserExceptionHandler.handleUserValidation() is called");
 		logger.warn("UserExceptionHandler.handleUserValidation() : Validation 오류, 데이터 형식이 올바르지 않음");
 
 		// Validation 에러 맵

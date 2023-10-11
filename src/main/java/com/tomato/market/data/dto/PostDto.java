@@ -10,14 +10,17 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Builder
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class PostDto {
 
+	Integer postNum;
 	@Pattern(message = "잘못된 아이디 형식입니다.", regexp = "^[a-z0-9_-]{6,20}")
 	String userId; // userId는 세션에서 들고옴
 	@NotBlank(message = "지역을 입력하세요.")
@@ -32,7 +35,7 @@ public class PostDto {
 	@NotBlank(message = "거래희망 장소를 입력하세요. ")
 	String detailLocation;
 	Integer status; // 판매 상태 : 이것도 Enum?
-	Integer boughtUserId;
+	String boughtUserId;
 
 
 	public static PostEntity toPostEntity(PostDto postDto) {
@@ -53,6 +56,7 @@ public class PostDto {
 	public static PostDto toPostDto(PostEntity postEntity) {
 
 		return PostDto.builder()
+			.postNum(postEntity.getPostNum())
 			.userId(postEntity.getUserId())
 			.location(postEntity.getLocation())
 			.title(postEntity.getTitle())

@@ -37,5 +37,5 @@ public class PostEntity {
 	Integer status;
 	@CreatedDate
 	Date createdAt; // 애노테이션?
-	Integer boughtUserId;
+	String boughtUserId;
 }

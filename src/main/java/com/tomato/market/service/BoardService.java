@@ -11,7 +11,7 @@ import com.tomato.market.data.dto.PostDto;
 public interface BoardService {
 	PostDto writePost(PostDto postDto);
 
-	void uploadImages(MultipartFile[] files) throws IOException;
+	void uploadImages(Integer postNum, List<MultipartFile> files) throws IOException;
 
 	List<PostDto> getPostList();
 

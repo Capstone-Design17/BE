@@ -43,30 +43,33 @@ public class BoardController {
 	@PostMapping(value = "/board/writePost", consumes = {MediaType.APPLICATION_JSON_VALUE,
 		MediaType.MULTIPART_FORM_DATA_VALUE})
 	public PostResponseDto writePost(
-		@RequestPart("postDto") @Valid PostDto postDto,
-		@RequestPart(value = "files", required = false) MultipartFile[] files)
+		@RequestPart(value = "postDto") @Valid PostDto postDto,
+		@RequestPart(value = "images", required = false) List<MultipartFile> files)
 		throws IOException { // 추후 @Valid // 이미지도 받아와야 함
-		logger.info("BoardController.registerPost() is called");
-		logger.info("BoardController.registerPost() : Validation 검증 성공");
+		logger.info("BoardController.writePost() is called");
+		logger.info("BoardController.writerPost() : Validation 검증 성공");
 
 		// 게시글 등록
-		boardService.writePost(postDto);
-		logger.info("BoardController.registerPost() : 게시글 저장 성공");
+		PostDto savedPost = boardService.writePost(postDto);
+		logger.info("BoardController.writePost() : 게시글 저장 성공");
+
+		Integer postNum = savedPost.getPostNum(); //
 
 		if (files != null) {
-			logger.info("BoardController.registerPost() : 이미지가 존재하는 Post");
+			logger.info("BoardController.writePost() : 이미지 개수-" + files.size());
 			// postID와 연관하여 이미지 등록 // Image API를 따로 분리? : DB간 관계가 성립되지 않는 문제 있음
-			boardService.uploadImages(files);
-			logger.info("BoardController.registerPost() : 이미지 저장 성공");
+			boardService.uploadImages(postNum, files);
+			logger.info("BoardController.writePost() : 이미지 저장 성공");
 		}
 
 		// 결과 리턴
 		return PostResponseDto.builder()
 			.status(HttpStatus.OK)
-			.message("게시글 등록에 성공했습니다.")
+			.message("게시글 등록 성공")
 			.build();
 	}
 
+	// 조회 삭제 수정 : 각각 별도 이슈로 분리?
 //	PutMapping?
 //	updatePost() {}
 
