@@ -58,9 +58,9 @@ public class BoardServiceImpl implements BoardService {
 	public void uploadImages(Integer postNum, List<MultipartFile> files) { // 이미지 업로드
 		logger.info("BoardServiceImpl.uploadImages() is called");
 		//유
-		int count = 0;
+		int count = 1;
 		for (MultipartFile file : files) {
-			logger.info("BoardServiceImpl.uploadImages() : 이미지" + (count + 1) + " 저장 시도");
+			logger.info("BoardServiceImpl.uploadImages() : 이미지" + (count++) + " 저장 시도");
 			UUID uuid = UUID.randomUUID(); // UUID 생성
 			String fileName = uuid + "_" + file.getOriginalFilename(); // 저장될 unique한 이름 생성 : originalName 형식 어떻게 되는지?
 			logger.info("BoardServiceImpl.uploadImages() : fileName-" + fileName); // 파일 이름 형식 체크
@@ -71,16 +71,17 @@ public class BoardServiceImpl implements BoardService {
 			} catch (Exception e) {
 				logger.warn("BoardServiceImpl.uploadImages() : 파일 저장 실패");
 				e.printStackTrace();
-				throw new BoardException((count + 1) + "번째 이미지 저장에 실패했습니다.");
+				throw new BoardException("이미지 파일 저장에 실패했습니다.");
 			}
+			logger.info("BoardServiceImpl.uploadImages() : 이미지 파일 저장 성공");
 
 //			 DB에 파일 정보 저장
 			ImageEntity imageEntity =
 				ImageEntity.builder().postNum(postNum).imageName(file.getOriginalFilename()).uuid(fileName).build();
 			ImageEntity saveResult = boardDao.saveImage(imageEntity); // 어떤 식으로 저장되는지 repository 분리?
-			if (imageEntity == null) {
+			if (saveResult == null) {
 				logger.warn("BoardServiceImpl.uploadImages() : DB에 정보 저장 실패");
-				throw new BoardException((count + 1) + "번째 이미지 정보 저장에 실패했습니다.");
+				throw new BoardException("이미지 정보 저장에 실패했습니다.");
 			} // 예외 처리
 			logger.info("BoardServiceImpl.uploadImages() : DB에 정보 저장 성공");
 		}

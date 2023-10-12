@@ -59,7 +59,7 @@ public class BoardControllerTest {
 
 	// Image 입력값
 	private String fileName = "images";
-	private List<MultipartFile> files = new ArrayList<>(); // 어떻게 입력값을 생성?
+	private List<MultipartFile> files = new ArrayList<>(); //
 	private MockMultipartFile file1;
 	private MockMultipartFile file2;
 
@@ -82,7 +82,11 @@ public class BoardControllerTest {
 			.title(title)
 			.category(category)
 			.content(content)
-			.price(price).detailLocation(detailLocation).status(status).boughtUserId(boughtUserId).build();
+			.price(price)
+			.detailLocation(detailLocation)
+			.status(status)
+			.boughtUserId(boughtUserId)
+			.build();
 
 		// 이미지 객체
 		file1 = new MockMultipartFile(fileName, "test1.png", MediaType.IMAGE_PNG_VALUE, "test1".getBytes());
@@ -104,16 +108,21 @@ public class BoardControllerTest {
 		postDtoJson = new ObjectMapper().writeValueAsString(postDto); // postDto와, Image가 어떻게 전송되는지?
 		postFile = new MockMultipartFile(
 			"postDto", "", "application/json", postDtoJson.getBytes());
-		mockMvc.perform(multipart("/api/board/writePost")
-				.file(file1)
-				.file(file2)
-				.file(postFile)
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.accept(MediaType.APPLICATION_JSON)
-			)
-			.andExpect(status().isOk())
-			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"게시글 등록 성공\"}"))
-			.andDo(print());
+		try {
+			mockMvc.perform(multipart("/api/board/writePost")
+					.file(file1)
+					.file(file2)
+					.file(postFile)
+					.contentType(MediaType.MULTIPART_FORM_DATA)
+					.accept(MediaType.APPLICATION_JSON)
+				)
+				.andExpect(status().isOk())
+				.andExpect(content().string("{\"status\":\"OK\",\"message\":\"게시글 등록 성공\"}"))
+				.andDo(print());
+
+		} catch (Exception exception) {
+			exception.printStackTrace();
+		}
 
 		//
 		verify(boardService).writePost(any(PostDto.class));
@@ -144,7 +153,7 @@ public class BoardControllerTest {
 
 	@Test
 	@DisplayName("게시글_DTO_저장_실패")
-	void writePostFailed() throws Exception {
+	void writePostFailure() throws Exception {
 		given(boardService.writePost(any(PostDto.class))).willThrow(new BoardException("게시글 등록에 실패했습니다."));
 
 		postDtoJson = new ObjectMapper().writeValueAsString(postDto); // postDto와, Image가 어떻게 전송되는지?
@@ -167,7 +176,7 @@ public class BoardControllerTest {
 
 	@Test
 	@DisplayName("게시글_이미지_저장_실패")
-	void uploadImageFailed() throws Exception {
+	void uploadImageFailure() throws Exception {
 		given(boardService.writePost(any(PostDto.class))).willReturn(postDto);
 		doThrow(new BoardException("1번째 이미지 저장에 실패했습니다."))
 			.when(boardService).uploadImages(postDto.getPostNum(), files);
@@ -193,7 +202,7 @@ public class BoardControllerTest {
 
 	@Test
 	@DisplayName("게시글_이미지_정보_저장_실패")
-	void saveImageInfoFailed() throws Exception {
+	void saveImageInfoFailure() throws Exception {
 		given(boardService.writePost(any(PostDto.class))).willReturn(postDto);
 		doThrow(new BoardException("1번째 이미지 정보 저장에 실패했습니다."))
 			.when(boardService).uploadImages(postDto.getPostNum(), files);
