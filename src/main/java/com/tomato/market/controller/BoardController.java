@@ -49,9 +49,6 @@ public class BoardController {
 		logger.info("BoardController.writePost() is called");
 		logger.info("BoardController.writerPost() : Validation 검증 성공");
 
-		logger.warn(postDto.toString());
-		logger.warn(files.toString());
-
 		// 게시글 등록
 		PostDto savedPost = boardService.writePost(postDto);
 		logger.info("BoardController.writePost() : 게시글 저장 성공");
