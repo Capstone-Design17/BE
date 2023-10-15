@@ -19,7 +19,8 @@ nohup java -jar market-0.0.1.SNAPSHOT.jar
 ## Build
 
 ```bash
-./gradlew clean build
+FatBuild:
+./gradlew clean bootJar
 ```
 
 ## Test
