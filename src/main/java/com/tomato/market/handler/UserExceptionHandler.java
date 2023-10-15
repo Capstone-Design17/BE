@@ -9,10 +9,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.tomato.market.controller.UserController;
 import com.tomato.market.data.dto.UserResponseDto;
 import com.tomato.market.handler.exception.UserException;
 
-@RestControllerAdvice
+@RestControllerAdvice(basePackageClasses = UserController.class)
 public class UserExceptionHandler {
 
 	private final Logger logger = LoggerFactory.getLogger(UserExceptionHandler.class);
@@ -35,6 +36,7 @@ public class UserExceptionHandler {
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public UserResponseDto handleUserValidation(MethodArgumentNotValidException exception) {
+		logger.info("UserExceptionHandler.handleUserValidation() is called");
 		logger.warn("UserExceptionHandler.handleUserValidation() : Validation 오류, 데이터 형식이 올바르지 않음");
 
 		// Validation 에러 맵

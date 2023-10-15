@@ -38,5 +38,4 @@ public class UserEntity {
 	String lastLogin;
 	Integer status;
 	String resignReason;
-
 }
