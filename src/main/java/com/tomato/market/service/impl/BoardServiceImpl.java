@@ -1,6 +1,8 @@
 package com.tomato.market.service.impl;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,7 +60,7 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public void uploadImages(Integer postNum, List<MultipartFile> files) { // 이미지 업로드
 		logger.info("BoardServiceImpl.uploadImages() is called");
-		//유
+
 		int count = 1;
 		for (MultipartFile file : files) {
 			logger.info("BoardServiceImpl.uploadImages() : 이미지" + (count++) + " 저장 시도");
@@ -91,32 +94,53 @@ public class BoardServiceImpl implements BoardService {
 	}
 
 	@Override
-	public List<PostDto> getPostList() {
-		// getPostList의 범위
-		// 한번에 모든 데이터를 불러오는 것은 무리가 있음
-		// 한 페이지 당으로 제약해서 get?
+	public List<PostDto> getPostList() { // 페이징 예정
+		logger.info("BoardServiceImpl.getPostList() is called");
 
 		List<PostEntity> postEntities = boardDao.findPostList();
-		if (postEntities != null) {
+		if (postEntities == null) {
 			// 예외처리
+			logger.warn("BoardServiceImpl.getPostList() : 포스트 목록 조회 실패");
+			throw new BoardException("목록을 불러오지 못했습니다.");
+		}
+		logger.info("BoardServiceImpl.getPostList() : 포스트 목록 조회 성공");
+
+		// Entity -> DTO 전환 후 List에 추가
+		List<PostDto> postList = new ArrayList<>();
+		for (PostEntity postEntity : postEntities) {
+			postList.add(PostDto.toPostDto(postEntity));
 		}
 
-		// get한 정보를 어떻게 리스트로?
-		// Entity -> DTO 전환
-		return null;
+		return postList;
 	}
 
 	@Override
 	public ImageDto getPostImage(Integer postNum) {
+		logger.info("BoardServiceImpl.getPostImage() is called");
 		// 게시글의 id로 image를 찾아 반환
-		ImageEntity imageEntity = boardDao.findImageByPostNum(postNum);
-		if (imageEntity == null) {
-			// 이미지 없는 게시물
+		ImageEntity imageEntity = boardDao.findImageByPostNum(postNum); // 1개만 받는 메소드
+
+		// 이미지가 없는 경우, Default 이미지 전송
+		if (imageEntity == null) { // 이미지 없는 게시물
+			logger.info("BoardServiceImpl.getPostImage() : 이미지가 없는 포스트");
 			// Default Image 반환
-			imageEntity = ImageEntity.builder().build();
+			imageEntity = ImageEntity.builder()
+				.imageNum(0)
+				.postNum(postNum)
+				.imageName("default")
+				.uuid("default.png")
+				.build();
+		} else {
+			logger.info("BoardServiceImpl.getPostImage() : 이미지가 있는 포스트");
 		}
 
 		// Entity -> DTO 전환하여 반환
 		return ImageDto.toImageDto(imageEntity);
+	}
+
+	@Override
+	public UrlResource getImageFile(ImageDto imageDto) throws MalformedURLException {
+		logger.info("BoardServiceImpl.getImageFile() is called");
+		return new UrlResource("file:" + projectPath + "/" + imageDto.getUuid()); //
 	}
 }

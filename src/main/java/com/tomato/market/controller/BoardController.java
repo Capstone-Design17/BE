@@ -1,12 +1,14 @@
 package com.tomato.market.controller;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,38 +77,40 @@ public class BoardController {
 
 
 	@GetMapping("/board/getPostList")
-	public PostListResponseDto getPostList() { // 리턴 타입을 리스트로?
+	public PostListResponseDto getPostList() throws MalformedURLException { // 리턴 타입을 리스트로?
 		// 모든 게시글 조회 -> 페이징 처리 예정, int page 받기
 		logger.info("BoardController.getPostList() is called");
 
-//		List<PostDto> postList = boardService.getAllPostList();
-		List<PostDto> postList = boardService.getPostList();
-		if (postList == null) { // 잘못됨
-			logger.warn("BoardController.getPostList() : 게시글 리스트를 찾을 수 없음");
-			// throw new Error // Service에서 처리?
-		}
 		// 게시글 리스트를 받음
+		List<PostDto> postList = boardService.getPostList();
 		logger.info("BoardController.getPostList() : 게시글 리스트를 찾음");
 
 		// 찾은 postList에서 각 Post의 ID로 Image를 찾음
 		List<ImageDto> imageList = new ArrayList<>();
-		for (int i = 0; i < postList.size(); i++) {
-//			imageList.add(
-//			 썸네일로 사용할 Image 1개만 필요
-//				boardService.getPostImage(postList.get(i).getPostNum())
-//			 이미지가 없는 경우는 Service 단에서 Default 이미지 전송
-//			);
+		for (PostDto postDto : postList) {
+			// 썸네일로 사용할 Image 1개만 필요
+			imageList.add(boardService.getPostImage(postDto.getPostNum()));
 		}
+		logger.info("BoardController.getPostList() : 게시글의 이미지 정보를 찾음");
+
+		// URL을 파일로 변환
+		List<UrlResource> imageFileList = new ArrayList<>();
+		for (ImageDto imageDto : imageList) {
+			imageFileList.add(boardService.getImageFile(imageDto));
+		}
+		logger.info("BoardController.getPostList() : 게시글의 이미지 파일을 찾음");
 
 
 		// Return
 		// 게시글 List 첨부
 		// 이미지 List 첨부
 		// 하나의 응답 DTO로 변환하여 반환
+		// multiPartFile 반환?
 		return PostListResponseDto.builder()
 			.status(HttpStatus.OK)
 			.message("게시글 리스트 불러오기 성공")
-			.content(postList)
+			.postList(postList)
+			.imageFileList(imageFileList)
 			.build();
 	}
 

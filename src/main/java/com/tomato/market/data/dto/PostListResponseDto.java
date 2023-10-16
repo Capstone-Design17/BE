@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class PostListResponseDto {
 	HttpStatus status;
 	Object message;
-	Object content;
+	Object postList;
+	Object imageFileList;
 }

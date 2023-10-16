@@ -13,6 +13,7 @@ import com.tomato.market.data.entity.ImageEntity;
 import com.tomato.market.data.entity.PostEntity;
 import com.tomato.market.data.repository.ImageRepository;
 import com.tomato.market.data.repository.PostRepository;
+import com.tomato.market.handler.exception.BoardException;
 
 @Service
 @Transactional
@@ -60,13 +61,12 @@ public class BoardDaoImpl implements BoardDao {
 	@Override
 	public List<PostEntity> findPostList() {
 //
-//		Optional<List<PostEntity>> postEntities = postRepository.find();
-//		if (postEntities.isPresent()) {
-//			return postEntities.get();
-//		} else {
-//			throw new BoardException("데이터를 불러오지 못했습니다.");
-//		}
-		return null;
+		List<PostEntity> postEntities = postRepository.findAll(); // 페이징 여부에 따라 수정될 여지 있음 // findPostAll
+		if (postEntities != null) {
+			return postEntities;
+		} else {
+			throw new BoardException("데이터 목록을 불러오지 못했습니다.");
+		}
 	}
 
 	@Override

@@ -1,8 +1,10 @@
 package com.tomato.market.service;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 
+import org.springframework.core.io.UrlResource;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tomato.market.data.dto.ImageDto;
@@ -17,4 +19,5 @@ public interface BoardService {
 
 	ImageDto getPostImage(Integer postNum);
 
+	UrlResource getImageFile(ImageDto imageDto) throws MalformedURLException;
 }
