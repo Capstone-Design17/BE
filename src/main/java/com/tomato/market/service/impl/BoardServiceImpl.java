@@ -1,7 +1,6 @@
 package com.tomato.market.service.impl;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -10,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -138,9 +136,4 @@ public class BoardServiceImpl implements BoardService {
 		return ImageDto.toImageDto(imageEntity);
 	}
 
-	@Override
-	public UrlResource getImageFile(ImageDto imageDto) throws MalformedURLException {
-		logger.info("BoardServiceImpl.getImageFile() is called");
-		return new UrlResource("file:" + projectPath + "/" + imageDto.getUuid()); //
-	}
 }
