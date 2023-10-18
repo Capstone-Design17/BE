@@ -49,7 +49,6 @@ public class BoardServiceImpl implements BoardService {
 			throw new BoardException("게시글 등록에 실패했습니다.");
 		}
 
-
 		// 반환
 		logger.info("BoardServiceImpl.writePost() : 게시글 등록 성공");
 		return PostDto.toPostDto(saveResult);
