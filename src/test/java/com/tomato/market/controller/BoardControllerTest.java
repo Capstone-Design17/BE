@@ -1,10 +1,13 @@
 package com.tomato.market.controller;
 
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -29,6 +32,7 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
 import com.tomato.market.handler.exception.BoardException;
 import com.tomato.market.service.impl.BoardServiceImpl;
@@ -65,6 +69,15 @@ public class BoardControllerTest {
 
 	private String postDtoJson = ""; // API 요청 body
 
+	// PostList 반환값
+	private List<PostDto> postList;
+	private List<ImageDto> imageList;
+
+	private ImageDto imageDto;
+	private String imageName = "original.png";
+	private String uuid = "uuidoriginal.png";
+
+
 	@Autowired
 	private WebApplicationContext ctx;
 
@@ -95,6 +108,22 @@ public class BoardControllerTest {
 		files.add(file1);
 		files.add(file2);
 
+		// 게시글 리스트
+		postList = new ArrayList<>();
+		postList.add(postDto);
+		postList.add(postDto);
+
+		// 이미지 DB 정보
+		imageDto = ImageDto.builder()
+			.postNum(postNum)
+			.imageName(imageName)
+			.uuid(uuid)
+			.build();
+
+		// 이미지 리스트
+		imageList = new ArrayList<>();
+		imageList.add(imageDto);
+		imageList.add(imageDto);
 	}
 
 	@Test
@@ -224,5 +253,35 @@ public class BoardControllerTest {
 		//
 		verify(boardService).writePost(any(PostDto.class));
 		verify(boardService).uploadImages(postDto.getPostNum(), files);
+	}
+
+	@Test
+	@DisplayName("게시글_리스트_불러오기_성공")
+	void getPostListSuccess() throws Exception {
+		given(boardService.getPostList()).willReturn(postList);
+		given(boardService.getPostImage(postNum)).willReturn(imageDto);
+
+		mockMvc.perform(get("/api/board/getPostList"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("게시글 리스트 불러오기 성공")))
+			.andExpect(jsonPath("$.postList").exists())
+			.andExpect(jsonPath("$.imageList").exists())
+			.andDo(print());
+
+		verify(boardService).getPostList();
+		verify(boardService, times(2)).getPostImage(postNum);
+	}
+
+	@Test
+	@DisplayName("게시글_리스트_게시글_불러오기_실패")
+	void getPostListFail() throws Exception {
+		given(boardService.getPostList()).willThrow(new BoardException("목록을 불러오지 못했습니다."));
+
+		mockMvc.perform(get("/api/board/getPostList"))
+			.andExpect(status().isOk())
+			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"목록을 불러오지 못했습니다.\"}"))
+			.andDo(print());
+
+		verify(boardService).getPostList();
 	}
 }

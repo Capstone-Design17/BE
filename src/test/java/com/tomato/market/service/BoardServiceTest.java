@@ -52,6 +52,8 @@ public class BoardServiceTest {
 	private PostEntity postEntity;
 
 	private ImageEntity imageEntity;
+	private String imageName = "original.png";
+	private String uuid = "uuidoriginal.png";
 
 
 	private List<MultipartFile> files = new ArrayList<>();
@@ -68,7 +70,11 @@ public class BoardServiceTest {
 
 		postEntity = PostDto.toPostEntity(postDto);
 
-		imageEntity = ImageEntity.builder().build();
+		imageEntity = ImageEntity.builder()
+			.postNum(postNum)
+			.imageName(imageName)
+			.uuid(uuid)
+			.build();
 	}
 
 	@Test

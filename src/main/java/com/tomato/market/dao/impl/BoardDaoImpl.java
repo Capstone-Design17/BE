@@ -75,9 +75,8 @@ public class BoardDaoImpl implements BoardDao {
 		Optional<ImageEntity> imageEntity = imageRepository.findImageByPostNum(postNum);
 		if (imageEntity.isPresent()) { // PostId로 이미지를 찾음
 			return imageEntity.get();
-		} else { // 이미지를 찾지 못함 or 애초에 없음?
-			throw new BoardException("이미지를 찾지 못했습니다.");
-			// or return null?
+		} else { // 이미지를 찾지 못함 or 애초에 없음
+			return null;
 		}
 	}
 }
