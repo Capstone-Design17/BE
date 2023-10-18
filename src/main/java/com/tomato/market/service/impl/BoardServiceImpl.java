@@ -122,9 +122,8 @@ public class BoardServiceImpl implements BoardService {
 			logger.info("BoardServiceImpl.getPostImage() : 이미지가 없는 포스트");
 			// Default Image 반환
 			imageEntity = ImageEntity.builder()
-				.imageNum(0)
 				.postNum(postNum)
-				.imageName("default")
+				.imageName("default.png")
 				.uuid("default.png")
 				.build();
 		} else {

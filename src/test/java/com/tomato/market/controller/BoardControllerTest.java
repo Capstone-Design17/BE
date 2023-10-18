@@ -274,7 +274,7 @@ public class BoardControllerTest {
 
 	@Test
 	@DisplayName("게시글_리스트_게시글_불러오기_실패")
-	void getPostListFail() throws Exception {
+	void getPostListFailure() throws Exception {
 		given(boardService.getPostList()).willThrow(new BoardException("목록을 불러오지 못했습니다."));
 
 		mockMvc.perform(get("/api/board/getPostList"))
