@@ -23,6 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -77,6 +81,12 @@ public class BoardControllerTest {
 	private String imageName = "original.png";
 	private String uuid = "uuidoriginal.png";
 
+	// Page
+	private Pageable pageable = PageRequest.of(0, 10);
+	private Page<PostDto> postPageList;
+
+	// Search
+	private String keyword = "keyword";
 
 	@Autowired
 	private WebApplicationContext ctx;
@@ -113,6 +123,7 @@ public class BoardControllerTest {
 		postList.add(postDto);
 		postList.add(postDto);
 
+
 		// 이미지 DB 정보
 		imageDto = ImageDto.builder()
 			.postNum(postNum)
@@ -124,6 +135,10 @@ public class BoardControllerTest {
 		imageList = new ArrayList<>();
 		imageList.add(imageDto);
 		imageList.add(imageDto);
+
+		// Page
+		postPageList = new PageImpl<>(postList, pageable, 2);
+
 	}
 
 	@Test
@@ -258,8 +273,9 @@ public class BoardControllerTest {
 	@Test
 	@DisplayName("게시글_리스트_불러오기_성공")
 	void getPostListSuccess() throws Exception {
-		given(boardService.getPostList()).willReturn(postList);
+		given(boardService.getPostList(any(Pageable.class))).willReturn(postPageList);
 		given(boardService.getPostImage(postNum)).willReturn(imageDto);
+
 
 		mockMvc.perform(get("/api/board/getPostList"))
 			.andExpect(status().isOk())
@@ -268,20 +284,52 @@ public class BoardControllerTest {
 			.andExpect(jsonPath("$.imageList").exists())
 			.andDo(print());
 
-		verify(boardService).getPostList();
+		verify(boardService).getPostList(any(Pageable.class));
 		verify(boardService, times(2)).getPostImage(postNum);
 	}
 
 	@Test
 	@DisplayName("게시글_리스트_게시글_불러오기_실패")
 	void getPostListFailure() throws Exception {
-		given(boardService.getPostList()).willThrow(new BoardException("목록을 불러오지 못했습니다."));
+		given(boardService.getPostList(any(Pageable.class))).willThrow(new BoardException("목록을 불러오지 못했습니다."));
 
 		mockMvc.perform(get("/api/board/getPostList"))
 			.andExpect(status().isOk())
 			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"목록을 불러오지 못했습니다.\"}"))
 			.andDo(print());
 
-		verify(boardService).getPostList();
+		verify(boardService).getPostList(any(Pageable.class));
+	}
+
+	@Test
+	@DisplayName("게시글_리스트_검색_성공")
+	void getPostSearchListSuccess() throws Exception {
+		given(boardService.getPostSearchList(any(String.class), any(Pageable.class))).willReturn(postPageList);
+		given(boardService.getPostImage(postNum)).willReturn(imageDto);
+
+		mockMvc.perform(get("/api/board/getPostList").param("keyword", "keyword"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("게시글 리스트 불러오기 성공")))
+			.andExpect(jsonPath("$.postList").exists())
+			.andExpect(jsonPath("$.imageList").exists())
+			.andDo(print());
+
+
+		verify(boardService).getPostSearchList(any(String.class), any(Pageable.class));
+		verify(boardService, times(2)).getPostImage(postNum);
+	}
+
+	@Test
+	@DisplayName("게시글_리스트_검색_실패")
+	void getPostSearchListFailure() throws Exception {
+		given(boardService.getPostSearchList(any(String.class), any(Pageable.class))).willThrow(
+			new BoardException("검색 결과 목록을 불러오지 못했습니다."));
+
+		mockMvc.perform(get("/api/board/getPostList").param("keyword", "keyword"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("검색 결과 목록을 불러오지 못했습니다.")))
+			.andDo(print());
+
+		verify(boardService).getPostSearchList(any(String.class), any(Pageable.class));
 	}
 }

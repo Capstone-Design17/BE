@@ -91,6 +91,7 @@ public class BoardController {
 		// 게시글 리스트를 받음
 		Page<PostDto> postList = null;
 		if (keyword == null) {
+			logger.info("BoardController.getPostList() : 검색 키워드 없음");
 			postList = boardService.getPostList(pageable);
 		} else {
 			logger.info("BoardController.getPostList() : 검색 키워드 있음");
