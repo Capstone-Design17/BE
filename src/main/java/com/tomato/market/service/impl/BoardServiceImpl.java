@@ -110,6 +110,21 @@ public class BoardServiceImpl implements BoardService {
 	}
 
 	@Override
+	public Page<PostDto> getPostSearchList(String keyword, Pageable pageable) {
+		logger.info("BoardServiceImpl.getPostSearchList() is called");
+
+		Page<PostEntity> postEntities = boardDao.findPostSearchList(keyword, pageable);
+		if (postEntities == null) {
+			logger.warn("BoardServiceImpl.getPostSearchList() : 검색 결과 목록 조회 실패");
+			throw new BoardException("검색 결과 목록을 불러오지 못했습니다.");
+		}
+		logger.info("BoardServiceImpl.getPostSearchList() : 검색 결과 목록 조회 성공");
+
+		Page<PostDto> postList = postEntities.map(PostDto::toPostDto);
+		return postList;
+	}
+
+	@Override
 	public ImageDto getPostImage(Integer postNum) {
 		logger.info("BoardServiceImpl.getPostImage() is called");
 		// 게시글의 id로 image를 찾아 반환

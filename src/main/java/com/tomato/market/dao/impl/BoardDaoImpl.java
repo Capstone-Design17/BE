@@ -62,12 +62,29 @@ public class BoardDaoImpl implements BoardDao {
 
 	@Override
 	public Page<PostEntity> findPostList(Pageable pageable) {
-//
+		logger.info("BoardDaoImpl.findPostList() is called");
+
 		Page<PostEntity> postEntities = postRepository.findAll(pageable); // 페이징 여부에 따라 수정될 여지 있음 // findPostAll
 		if (postEntities != null) {
+			logger.info("BoardDaoImpl.findPostList() : 데이터 목록 조회 성공");
 			return postEntities;
 		} else {
+			logger.warn("BoardDaoImpl.findPostList() : 데이터 목록 조회 실패");
 			throw new BoardException("데이터 목록을 불러오지 못했습니다.");
+		}
+	}
+
+	@Override
+	public Page<PostEntity> findPostSearchList(String keyword, Pageable pageable) {
+		logger.info("BoardDaoImpl.findPostSearchList() is called");
+
+		Page<PostEntity> postEntities = postRepository.findByTitleContaining(keyword, pageable);
+		if (postEntities != null) {
+			logger.info("BoardDaoImpl.findPostSearchList() : 검색 목록 조회 성공");
+			return postEntities;
+		} else {
+			logger.warn("BoardDaoImpl.findPostSearchList() : 검색 목록 조회 실패");
+			throw new BoardException("검색 결과 목록을 불러오지 못했습니다.");
 		}
 	}
 

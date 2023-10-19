@@ -17,15 +17,16 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tomato.market.data.dto.ImageDto;
+import com.tomato.market.data.dto.PageDto;
 import com.tomato.market.data.dto.PostDto;
 import com.tomato.market.data.dto.PostListResponseDto;
 import com.tomato.market.data.dto.PostResponseDto;
-import com.tomato.market.data.dto.SearchDto;
 import com.tomato.market.service.BoardService;
 
 import jakarta.validation.Valid;
@@ -82,14 +83,21 @@ public class BoardController {
 
 	@GetMapping(value = "/board/getPostList")
 	public PostListResponseDto getPostList(
-		@PageableDefault(page = 0, size = 10, sort = "postNum", direction = Sort.Direction.DESC) Pageable pageable)
-		throws MalformedURLException { // 리턴 타입을 리스트로?
-		// 모든 게시글 조회 -> 페이징 처리 예정, int page 받기
+		@PageableDefault(page = 0, size = 10, sort = "postNum", direction = Sort.Direction.DESC) Pageable pageable,
+		@RequestParam(required = false) String keyword) throws MalformedURLException {
 		logger.info("BoardController.getPostList() is called");
-		logger.info("BoardController.getPostList() page : " + pageable.getPageNumber());
+//		logger.info("BoardController.getPostList() page : " + pageable.getPageNumber());
 
 		// 게시글 리스트를 받음
-		Page<PostDto> postList = boardService.getPostList(pageable);
+		Page<PostDto> postList = null;
+		if (keyword == null) {
+			postList = boardService.getPostList(pageable);
+		} else {
+			logger.info("BoardController.getPostList() : 검색 키워드 있음");
+			postList = boardService.getPostSearchList(keyword, pageable);
+		}
+
+
 		logger.info("BoardController.getPostList() : 게시글 리스트를 찾음");
 
 		int nowPage = postList.getPageable().getPageNumber() + 1;
@@ -97,7 +105,7 @@ public class BoardController {
 		int endPage = Math.min(nowPage + 2, postList.getTotalPages());
 		int totalPage = postList.getTotalPages();
 
-		SearchDto searchDto = SearchDto.builder()
+		PageDto pageDto = PageDto.builder()
 			.nowPage(nowPage)
 			.startPage(startPage)
 			.endPage(endPage)
@@ -122,7 +130,7 @@ public class BoardController {
 			.message("게시글 리스트 불러오기 성공")
 			.postList(postList)
 			.imageList(imageList)
-			.page(searchDto)
+			.page(pageDto)
 			.build();
 	}
 

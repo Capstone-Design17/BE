@@ -13,6 +13,8 @@ public interface BoardDao {
 
 	Page<PostEntity> findPostList(Pageable pageable);
 
+	Page<PostEntity> findPostSearchList(String keyword, Pageable pageable);
+
 	ImageEntity findImageByPostNum(Integer postNum);
 
 }

@@ -17,6 +17,8 @@ public interface BoardService {
 
 	Page<PostDto> getPostList(Pageable pageable);
 
+	Page<PostDto> getPostSearchList(String keyword, Pageable pageable);
+
 	ImageDto getPostImage(Integer postNum);
 
 }

@@ -8,6 +8,8 @@ import com.tomato.market.data.entity.PostEntity;
 
 public interface PostRepository extends JpaRepository<PostEntity, Integer> {
 	Page<PostEntity> findAll(Pageable pageable);
+
+	Page<PostEntity> findByTitleContaining(String keyword, Pageable pageable);
 	// findAll()? // int page
 //	Optional<List<PostEntity>> find();
 

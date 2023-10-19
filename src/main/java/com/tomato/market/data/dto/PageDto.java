@@ -13,7 +13,7 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class SearchDto {
+public class PageDto {
 	int nowPage;
 	int startPage;
 	int endPage;
