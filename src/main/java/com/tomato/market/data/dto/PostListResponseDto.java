@@ -18,4 +18,5 @@ public class PostListResponseDto {
 	Object message;
 	Object postList;
 	Object imageList;
+	Object page;
 }

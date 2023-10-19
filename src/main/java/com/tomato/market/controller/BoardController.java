@@ -8,6 +8,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +25,7 @@ import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
 import com.tomato.market.data.dto.PostListResponseDto;
 import com.tomato.market.data.dto.PostResponseDto;
+import com.tomato.market.data.dto.SearchDto;
 import com.tomato.market.service.BoardService;
 
 import jakarta.validation.Valid;
@@ -76,13 +81,29 @@ public class BoardController {
 
 
 	@GetMapping(value = "/board/getPostList")
-	public PostListResponseDto getPostList() throws MalformedURLException { // 리턴 타입을 리스트로?
+	public PostListResponseDto getPostList(
+		@PageableDefault(page = 0, size = 10, sort = "postNum", direction = Sort.Direction.DESC) Pageable pageable)
+		throws MalformedURLException { // 리턴 타입을 리스트로?
 		// 모든 게시글 조회 -> 페이징 처리 예정, int page 받기
 		logger.info("BoardController.getPostList() is called");
+		logger.info("BoardController.getPostList() page : " + pageable.getPageNumber());
 
 		// 게시글 리스트를 받음
-		List<PostDto> postList = boardService.getPostList();
+		Page<PostDto> postList = boardService.getPostList(pageable);
 		logger.info("BoardController.getPostList() : 게시글 리스트를 찾음");
+
+		int nowPage = postList.getPageable().getPageNumber() + 1;
+		int startPage = Math.max(nowPage - 2, 1);
+		int endPage = Math.min(nowPage + 2, postList.getTotalPages());
+		int totalPage = postList.getTotalPages();
+
+		SearchDto searchDto = SearchDto.builder()
+			.nowPage(nowPage)
+			.startPage(startPage)
+			.endPage(endPage)
+			.totalPage(totalPage)
+			.build();
+
 
 		// 찾은 postList에서 각 Post의 ID로 Image를 찾음
 		List<ImageDto> imageList = new ArrayList<>();
@@ -101,6 +122,7 @@ public class BoardController {
 			.message("게시글 리스트 불러오기 성공")
 			.postList(postList)
 			.imageList(imageList)
+			.page(searchDto)
 			.build();
 	}
 

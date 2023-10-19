@@ -1,7 +1,6 @@
 package com.tomato.market.service.impl;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -91,10 +92,10 @@ public class BoardServiceImpl implements BoardService {
 	}
 
 	@Override
-	public List<PostDto> getPostList() { // 페이징 예정
+	public Page<PostDto> getPostList(Pageable pageable) { // 페이징 예정
 		logger.info("BoardServiceImpl.getPostList() is called");
 
-		List<PostEntity> postEntities = boardDao.findPostList();
+		Page<PostEntity> postEntities = boardDao.findPostList(pageable);
 		if (postEntities == null) {
 			// 예외처리
 			logger.warn("BoardServiceImpl.getPostList() : 포스트 목록 조회 실패");
@@ -103,10 +104,7 @@ public class BoardServiceImpl implements BoardService {
 		logger.info("BoardServiceImpl.getPostList() : 포스트 목록 조회 성공");
 
 		// Entity -> DTO 전환 후 List에 추가
-		List<PostDto> postList = new ArrayList<>();
-		for (PostEntity postEntity : postEntities) {
-			postList.add(PostDto.toPostDto(postEntity));
-		}
+		Page<PostDto> postList = postEntities.map(PostDto::toPostDto);
 
 		return postList;
 	}

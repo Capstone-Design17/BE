@@ -1,11 +1,12 @@
 package com.tomato.market.dao.impl;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,9 +61,9 @@ public class BoardDaoImpl implements BoardDao {
 	}
 
 	@Override
-	public List<PostEntity> findPostList() {
+	public Page<PostEntity> findPostList(Pageable pageable) {
 //
-		List<PostEntity> postEntities = postRepository.findAll(); // 페이징 여부에 따라 수정될 여지 있음 // findPostAll
+		Page<PostEntity> postEntities = postRepository.findAll(pageable); // 페이징 여부에 따라 수정될 여지 있음 // findPostAll
 		if (postEntities != null) {
 			return postEntities;
 		} else {
