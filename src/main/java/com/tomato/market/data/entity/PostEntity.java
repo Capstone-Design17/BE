@@ -2,6 +2,7 @@ package com.tomato.market.data.entity;
 
 import java.util.Date;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -36,6 +37,7 @@ public class PostEntity {
 	String content;
 	Integer price;
 	String detailLocation;
+	@ColumnDefault("0")
 	Integer status;
 	@CreatedDate
 	Date createdAt; // 애노테이션?

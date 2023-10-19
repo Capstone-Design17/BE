@@ -21,9 +21,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tomato.market.dao.impl.BoardDaoImpl;
+import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
 import com.tomato.market.data.entity.ImageEntity;
 import com.tomato.market.data.entity.PostEntity;
@@ -52,13 +57,21 @@ public class BoardServiceTest {
 	private PostEntity postEntity;
 
 	private ImageEntity imageEntity;
+	private String imageName = "original.png";
+	private String uuid = "uuidoriginal.png";
 
 
 	private List<MultipartFile> files = new ArrayList<>();
-//	private MultipartFile file1;
-	//		new MockMultipartFile("file1", "testImage", MediaType.IMAGE_PNG_VALUE, "Test file content".getBytes());
-//	private MultipartFile file2;
-//		new MockMultipartFile("file2", "testImage", MediaType.IMAGE_PNG_VALUE, "Test file content".getBytes());
+
+	private List<PostEntity> postEntities;
+	private List<ImageEntity> imageEntities;
+
+	private Pageable pageable = PageRequest.of(0, 10);
+	private Page<PostEntity> postEntityList;
+	private String keyword = "keyword";
+	private List<PostDto> postDtoList;
+
+	private Page<PostDto> postDtoPage;
 
 
 	@BeforeEach
@@ -68,7 +81,27 @@ public class BoardServiceTest {
 
 		postEntity = PostDto.toPostEntity(postDto);
 
-		imageEntity = ImageEntity.builder().build();
+		imageEntity = ImageEntity.builder()
+			.postNum(postNum)
+			.imageName(imageName)
+			.uuid(uuid)
+			.build();
+
+		postEntities = new ArrayList<>();
+		postEntities.add(postEntity);
+		postEntities.add(postEntity);
+
+		imageEntities = new ArrayList<>();
+		imageEntities.add(imageEntity);
+		imageEntities.add(imageEntity);
+
+		postEntityList = new PageImpl<>(postEntities, pageable, 2);
+
+		postDtoList = new ArrayList<>();
+		postDtoList.add(PostDto.toPostDto(postEntity));
+		postDtoList.add(PostDto.toPostDto(postEntity));
+
+		postDtoPage = new PageImpl<>(postDtoList, pageable, 2);
 	}
 
 	@Test
@@ -147,5 +180,87 @@ public class BoardServiceTest {
 
 		verify(mockFile).transferTo(any(File.class));
 		verify(boardDao).saveImage(any(ImageEntity.class));
+	}
+
+	@Test
+	@DisplayName("게시글_리스트_조회_성공")
+	void getPostListSuccess() {
+		given(boardDao.findPostList(pageable)).willReturn(postEntityList);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+
+		Assertions.assertEquals(boardService.getPostList(pageable).toString(), postDtoPage.toString());
+
+		verify(boardDao).findPostList(pageable);
+	}
+
+	@Test
+	@DisplayName("게시글_리스트_조회_실패")
+	void getPostListFailure() {
+		given(boardDao.findPostList(pageable)).willReturn(null);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.getPostList(pageable);
+		});
+		Assertions.assertEquals(exception.getMessage(), "목록을 불러오지 못했습니다.");
+
+		verify(boardDao).findPostList(pageable);
+	}
+
+	@Test
+	@DisplayName("게시글_이미지_조회_성공")
+	void getPostImageSuccess() {
+		given(boardDao.findImageByPostNum(postNum)).willReturn(imageEntity);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(
+			boardService.getPostImage(postNum).toString(), ImageDto.toImageDto(imageEntity).toString());
+
+		verify(boardDao).findImageByPostNum(postNum);
+	}
+
+	@Test
+	@DisplayName("게시글_이미지_조회_실패")
+	void getPostImageFailure() {
+		given(boardDao.findImageByPostNum(postNum)).willReturn(null);
+
+		ImageEntity defaultImage = ImageEntity.builder()
+			.postNum(postNum)
+			.imageName("default.png")
+			.uuid("default.png")
+			.build();
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(
+			boardService.getPostImage(postNum).toString(), ImageDto.toImageDto(defaultImage).toString());
+
+		verify(boardDao).findImageByPostNum(postNum);
+	}
+
+	@Test
+	@DisplayName("게시글_리스트_검색_성공")
+	void getPostSearchSuccess() {
+		given(boardDao.findPostSearchList(any(String.class), any(Pageable.class))).willReturn(postEntityList);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.getPostSearchList(keyword, pageable).toString(), postDtoPage.toString());
+
+		verify(boardDao).findPostSearchList(any(String.class), any(Pageable.class));
+	}
+
+	@Test
+	@DisplayName("게시글_리스트_검색_실패")
+	void getPostSearchFailure() {
+		given(boardDao.findPostSearchList(any(String.class), any(Pageable.class))).willThrow(
+			new BoardException("검색 결과 목록을 불러오지 못했습니다."));
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.getPostSearchList(keyword, pageable);
+		});
+		Assertions.assertEquals(exception.getMessage(), "검색 결과 목록을 불러오지 못했습니다.");
+
+		verify(boardDao).findPostSearchList(any(String.class), any(Pageable.class));
 	}
 }

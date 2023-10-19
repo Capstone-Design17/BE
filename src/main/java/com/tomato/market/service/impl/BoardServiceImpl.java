@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,7 +50,6 @@ public class BoardServiceImpl implements BoardService {
 			throw new BoardException("게시글 등록에 실패했습니다.");
 		}
 
-
 		// 반환
 		logger.info("BoardServiceImpl.writePost() : 게시글 등록 성공");
 		return PostDto.toPostDto(saveResult);
@@ -57,7 +58,7 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public void uploadImages(Integer postNum, List<MultipartFile> files) { // 이미지 업로드
 		logger.info("BoardServiceImpl.uploadImages() is called");
-		//유
+
 		int count = 1;
 		for (MultipartFile file : files) {
 			logger.info("BoardServiceImpl.uploadImages() : 이미지" + (count++) + " 저장 시도");
@@ -91,32 +92,59 @@ public class BoardServiceImpl implements BoardService {
 	}
 
 	@Override
-	public List<PostDto> getPostList() {
-		// getPostList의 범위
-		// 한번에 모든 데이터를 불러오는 것은 무리가 있음
-		// 한 페이지 당으로 제약해서 get?
+	public Page<PostDto> getPostList(Pageable pageable) { // 페이징 예정
+		logger.info("BoardServiceImpl.getPostList() is called");
 
-		List<PostEntity> postEntities = boardDao.findPostList();
-		if (postEntities != null) {
+		Page<PostEntity> postEntities = boardDao.findPostList(pageable);
+		if (postEntities == null) {
 			// 예외처리
+			logger.warn("BoardServiceImpl.getPostList() : 포스트 목록 조회 실패");
+			throw new BoardException("목록을 불러오지 못했습니다.");
 		}
+		logger.info("BoardServiceImpl.getPostList() : 포스트 목록 조회 성공");
 
-		// get한 정보를 어떻게 리스트로?
-		// Entity -> DTO 전환
-		return null;
+		// Entity -> DTO 전환 후 List에 추가
+		Page<PostDto> postList = postEntities.map(PostDto::toPostDto);
+
+		return postList;
+	}
+
+	@Override
+	public Page<PostDto> getPostSearchList(String keyword, Pageable pageable) {
+		logger.info("BoardServiceImpl.getPostSearchList() is called");
+
+		Page<PostEntity> postEntities = boardDao.findPostSearchList(keyword, pageable);
+		if (postEntities == null) {
+			logger.warn("BoardServiceImpl.getPostSearchList() : 검색 결과 목록 조회 실패");
+			throw new BoardException("검색 결과 목록을 불러오지 못했습니다.");
+		}
+		logger.info("BoardServiceImpl.getPostSearchList() : 검색 결과 목록 조회 성공");
+
+		Page<PostDto> postList = postEntities.map(PostDto::toPostDto);
+		return postList;
 	}
 
 	@Override
 	public ImageDto getPostImage(Integer postNum) {
+		logger.info("BoardServiceImpl.getPostImage() is called");
 		// 게시글의 id로 image를 찾아 반환
-		ImageEntity imageEntity = boardDao.findImageByPostNum(postNum);
-		if (imageEntity == null) {
-			// 이미지 없는 게시물
+		ImageEntity imageEntity = boardDao.findImageByPostNum(postNum); // 1개만 받는 메소드
+
+		// 이미지가 없는 경우, Default 이미지 전송
+		if (imageEntity == null) { // 이미지 없는 게시물
+			logger.info("BoardServiceImpl.getPostImage() : 이미지가 없는 포스트");
 			// Default Image 반환
-			imageEntity = ImageEntity.builder().build();
+			imageEntity = ImageEntity.builder()
+				.postNum(postNum)
+				.imageName("default.png")
+				.uuid("default.png")
+				.build();
+		} else {
+			logger.info("BoardServiceImpl.getPostImage() : 이미지가 있는 포스트");
 		}
 
 		// Entity -> DTO 전환하여 반환
 		return ImageDto.toImageDto(imageEntity);
 	}
+
 }
