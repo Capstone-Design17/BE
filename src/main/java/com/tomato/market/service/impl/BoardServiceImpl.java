@@ -1,6 +1,7 @@
 package com.tomato.market.service.impl;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -147,4 +148,36 @@ public class BoardServiceImpl implements BoardService {
 		return ImageDto.toImageDto(imageEntity);
 	}
 
+	@Override
+	public PostDto getPost(Integer postNum) {
+		logger.info("BoardServiceImpl.getPost() is called");
+
+		PostEntity postEntity = boardDao.findPostByPostNum(postNum);
+		if (postEntity == null) {
+			logger.warn("BoardServiceImpl.getPost() : 게시글 조회 실패");
+			throw new BoardException("게시글을 찾을 수 없습니다.");
+		}
+		logger.info("BoardServiceImpl.getPost() : 게시글 조회 성공");
+
+		// Entity -> DTO 전환
+		return PostDto.toPostDto(postEntity);
+	}
+
+	@Override
+	public List<ImageDto> getPostImageList(Integer postNum) {
+		logger.info("BoardServiceImpl.getPostImageList() is called");
+
+		List<ImageEntity> imageEntities = boardDao.findImageListByPostNum(postNum);
+		if ((imageEntities == null)) {
+			logger.warn("BoardServiceImpl.getPostImageList() : 이미지 조회 실패");
+			throw new BoardException("이미지를 불러오지 못했습니다.");
+		}
+
+		// Entity -> DTO 변환
+		List<ImageDto> imageList = new ArrayList<>();
+		for (ImageEntity imageEntity : imageEntities) {
+			imageList.add(ImageDto.toImageDto(imageEntity));
+		}
+		return imageList;
+	}
 }

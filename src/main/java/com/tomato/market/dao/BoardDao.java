@@ -1,5 +1,7 @@
 package com.tomato.market.dao;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -17,4 +19,7 @@ public interface BoardDao {
 
 	ImageEntity findImageByPostNum(Integer postNum);
 
+	PostEntity findPostByPostNum(Integer postNum);
+
+	List<ImageEntity> findImageListByPostNum(Integer postNum);
 }
