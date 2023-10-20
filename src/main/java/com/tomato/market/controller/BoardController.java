@@ -135,10 +135,19 @@ public class BoardController {
 			.build();
 	}
 
-//	@PostMapping("/board/registerPost")
-//	public void registerPost() {
-//
-//	}
+	@GetMapping("/board/getPost")
+	public void getPost(Integer postNum) { // 게시글 조회
+		logger.info("BoardController.getPost() is called");
+
+		// 특정 값(postNum?)을 받아 그 내용을 조회 -> front가 postNum을 알고 있나?? 알고있을듯
+//		boardService.getPost(postNum);
+
+		// postNum으로 Image 데이터(다수) 조회
+//		boardService.getPostImageList(postNum);
+
+		// return값으로 postDto, imageList 전달
+//		return postResponseDto; ??
+	}
 
 //	@PostMapping("/board/registerImage")
 //	public void uploadImage() { // 이미지 등록 메소드를 별도 처리?

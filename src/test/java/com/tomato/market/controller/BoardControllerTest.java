@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -161,7 +160,7 @@ public class BoardControllerTest {
 					.accept(MediaType.APPLICATION_JSON)
 				)
 				.andExpect(status().isOk())
-				.andExpect(content().string("{\"status\":\"OK\",\"message\":\"게시글 등록 성공\"}"))
+				.andExpect(jsonPath("$.message", is("게시글 등록 성공")))
 				.andDo(print());
 
 		} catch (Exception exception) {
@@ -211,7 +210,7 @@ public class BoardControllerTest {
 				.accept(MediaType.APPLICATION_JSON)
 			)
 			.andExpect(status().isOk())
-			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"게시글 등록에 실패했습니다.\"}"))
+			.andExpect(jsonPath("$.message", is("게시글 등록에 실패했습니다.")))
 			.andDo(print());
 
 		//
@@ -236,7 +235,7 @@ public class BoardControllerTest {
 				.accept(MediaType.APPLICATION_JSON)
 			)
 			.andExpect(status().isOk())
-			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"1번째 이미지 저장에 실패했습니다.\"}"))
+			.andExpect(jsonPath("$.message", is("1번째 이미지 저장에 실패했습니다.")))
 			.andDo(print());
 
 		//
@@ -262,7 +261,7 @@ public class BoardControllerTest {
 				.accept(MediaType.APPLICATION_JSON)
 			)
 			.andExpect(status().isOk())
-			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"1번째 이미지 정보 저장에 실패했습니다.\"}"))
+			.andExpect(jsonPath("$.message", is("1번째 이미지 정보 저장에 실패했습니다.")))
 			.andDo(print());
 
 		//
@@ -295,7 +294,7 @@ public class BoardControllerTest {
 
 		mockMvc.perform(get("/api/board/getPostList"))
 			.andExpect(status().isOk())
-			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"목록을 불러오지 못했습니다.\"}"))
+			.andExpect(jsonPath("$.message", is("목록을 불러오지 못했습니다.")))
 			.andDo(print());
 
 		verify(boardService).getPostList(any(Pageable.class));

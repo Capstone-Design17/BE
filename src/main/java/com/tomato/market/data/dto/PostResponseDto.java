@@ -16,4 +16,6 @@ import lombok.Setter;
 public class PostResponseDto {
 	HttpStatus status;
 	Object message;
+	Object postDto;
+	Object imageList;
 }
