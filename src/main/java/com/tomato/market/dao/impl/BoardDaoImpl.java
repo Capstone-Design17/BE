@@ -92,7 +92,8 @@ public class BoardDaoImpl implements BoardDao {
 	@Override
 	public ImageEntity findImageByPostNum(Integer postNum) {
 		logger.info("BoardDaoImpl.findImageByPostNum() is called");
-		Optional<ImageEntity> imageEntity = imageRepository.findImageByPostNum(postNum);
+//		Optional<ImageEntity> imageEntity = imageRepository.findImageByPostNum(postNum);
+		Optional<ImageEntity> imageEntity = imageRepository.findTopByPostNumOrderByImageNum(postNum);
 		if (imageEntity.isPresent()) { // PostId로 이미지를 찾음
 			logger.info("BoardDaoImpl.findImageByPostNum() : 이미지 조회 성공");
 			return imageEntity.get();
