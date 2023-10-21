@@ -168,9 +168,13 @@ public class BoardServiceImpl implements BoardService {
 		logger.info("BoardServiceImpl.getPostImageList() is called");
 
 		List<ImageEntity> imageEntities = boardDao.findImageListByPostNum(postNum);
-		if ((imageEntities == null)) {
+		if ((imageEntities == null)) { // 이미지가 없는 데이터라면?
 			logger.warn("BoardServiceImpl.getPostImageList() : 이미지 조회 실패");
 			throw new BoardException("이미지를 불러오지 못했습니다.");
+		}
+
+		if (imageEntities.size() == 0) {
+			logger.warn("BoardServiceImpl.getPostImageList() : 이미지가 0개인 게시글");
 		}
 
 		// Entity -> DTO 변환

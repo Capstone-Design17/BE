@@ -331,4 +331,50 @@ public class BoardControllerTest {
 
 		verify(boardService).getPostSearchList(any(String.class), any(Pageable.class));
 	}
+
+	@Test
+	@DisplayName("게시글_조회_성공")
+	void getPostSuccess() throws Exception {
+		given(boardService.getPost(postNum)).willReturn(postDto);
+		given(boardService.getPostImageList(postNum)).willReturn(imageList);
+
+		mockMvc.perform(get("/api/board/getPost").param("postNum", String.valueOf(postNum)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("게시글 불러오기 성공")))
+			.andExpect(jsonPath("$.postDto").exists())
+			.andExpect(jsonPath("$.imageList").exists())
+			.andDo(print());
+
+		verify(boardService).getPost(postNum);
+		verify(boardService).getPostImageList(postNum);
+	}
+
+	@Test
+	@DisplayName("게시글_조회_실패")
+	void getPostFailure() throws Exception {
+		given(boardService.getPost(postNum)).willThrow(new BoardException("게시글을 찾을 수 없습니다."));
+
+		mockMvc.perform(get("/api/board/getPost").param("postNum", String.valueOf(postNum)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("게시글을 찾을 수 없습니다.")))
+			.andDo(print());
+
+		verify(boardService).getPost(postNum);
+
+	}
+
+	@Test
+	@DisplayName("게시글_이미지_리스트_조회_실패")
+	void getPostImageFailure() throws Exception {
+		given(boardService.getPost(postNum)).willReturn(postDto);
+		given(boardService.getPostImageList(postNum)).willThrow(new BoardException("이미지를 불러오지 못했습니다."));
+
+		mockMvc.perform(get("/api/board/getPost").param("postNum", String.valueOf(postNum)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("이미지를 불러오지 못했습니다.")))
+			.andDo(print());
+
+		verify(boardService).getPost(postNum);
+		verify(boardService).getPostImageList(postNum);
+	}
 }
