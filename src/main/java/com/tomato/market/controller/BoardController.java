@@ -135,7 +135,7 @@ public class BoardController {
 			.build();
 	}
 
-	@GetMapping("/board/getPost")
+	@GetMapping("/board/getPost") // {id} 형태로 받는게 나았을 수도?
 	public PostResponseDto getPost(Integer postNum) { // 게시글 조회
 		logger.info("BoardController.getPost() is called");
 
