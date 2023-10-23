@@ -1,5 +1,6 @@
 package com.tomato.market.dao.impl;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -90,11 +91,43 @@ public class BoardDaoImpl implements BoardDao {
 
 	@Override
 	public ImageEntity findImageByPostNum(Integer postNum) {
-		Optional<ImageEntity> imageEntity = imageRepository.findImageByPostNum(postNum);
+		logger.info("BoardDaoImpl.findImageByPostNum() is called");
+//		Optional<ImageEntity> imageEntity = imageRepository.findImageByPostNum(postNum);
+		Optional<ImageEntity> imageEntity = imageRepository.findTopByPostNumOrderByImageNum(postNum);
 		if (imageEntity.isPresent()) { // PostId로 이미지를 찾음
+			logger.info("BoardDaoImpl.findImageByPostNum() : 이미지 조회 성공");
 			return imageEntity.get();
 		} else { // 이미지를 찾지 못함 or 애초에 없음
+			logger.warn("BoardDaoImpl.findImageByPostNum() : 이미지 조회 실패");
 			return null;
+		}
+	}
+
+	@Override
+	public PostEntity findPostByPostNum(Integer postNum) {
+		logger.info("BoardDaoImpl.findPostByPostNum() is called");
+
+		Optional<PostEntity> postEntity = postRepository.findByPostNum(postNum);
+		if (postEntity.isPresent()) {
+			logger.info("BoardDaoImpl.findPostByPostNum() : 게시글 조회 성공");
+			return postEntity.get();
+		} else {
+			logger.warn("BoardDaoImpl.findPostByPostNum() : 게시글 조회 실패");
+			return null;
+		}
+	}
+
+	@Override
+	public List<ImageEntity> findImageListByPostNum(Integer postNum) {
+		logger.info("BoarDaoImpl.findImageListByPostNum() is called");
+
+		List<ImageEntity> imageEntities = imageRepository.findByPostNum(postNum);
+		if (imageEntities == null) {
+			logger.warn("BoarDaoImpl.findImageListByPostNum() : 이미지 리스트 조회 실패");
+			return null;
+		} else {
+			logger.info("BoardDaoImpl.findImageListByPostNum() : 이미지 리스트 조회 성공");
+			return imageEntities;
 		}
 	}
 }

@@ -1,5 +1,7 @@
 package com.tomato.market.data.dto;
 
+import java.util.Date;
+
 import com.tomato.market.data.entity.PostEntity;
 
 import jakarta.validation.constraints.NotBlank;
@@ -34,7 +36,8 @@ public class PostDto {
 	Integer price;
 	@NotBlank(message = "거래희망 장소를 입력하세요. ")
 	String detailLocation;
-	Integer status; // 판매 상태 : 이것도 Enum?
+	Integer status; // 판매 상태 : 판매중(0), 예약중(1), 판매완료(2), 취소(3)
+	Date createAt; // 등록 시간
 	String boughtUserId;
 
 
@@ -65,6 +68,7 @@ public class PostDto {
 			.price(postEntity.getPrice())
 			.detailLocation(postEntity.getDetailLocation())
 			.status(postEntity.getStatus())
+			.createAt(postEntity.getCreatedAt())
 			.boughtUserId(postEntity.getBoughtUserId())
 			.build();
 	}

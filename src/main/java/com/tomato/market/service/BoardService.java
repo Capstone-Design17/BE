@@ -21,4 +21,7 @@ public interface BoardService {
 
 	ImageDto getPostImage(Integer postNum);
 
+	PostDto getPost(Integer postNum);
+
+	List<ImageDto> getPostImageList(Integer postNum);
 }

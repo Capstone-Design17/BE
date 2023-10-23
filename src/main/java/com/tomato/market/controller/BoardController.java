@@ -135,10 +135,29 @@ public class BoardController {
 			.build();
 	}
 
-//	@PostMapping("/board/registerPost")
-//	public void registerPost() {
-//
-//	}
+	@GetMapping("/board/getPost") // {id} 형태로 받는게 나았을 수도?
+	public PostResponseDto getPost(Integer postNum) { // 게시글 조회
+		logger.info("BoardController.getPost() is called");
+
+		// 특정 값(postNum?)을 받아 그 내용을 조회 -> front가 postNum을 알고 있나?? 알고있을듯
+		PostDto postDto = boardService.getPost(postNum);
+		logger.info("BoardController.getPost() : 게시글 불러오기 성공");
+
+
+		// postNum으로 Image 데이터(다수) 조회
+		List<ImageDto> imageList = boardService.getPostImageList(postNum);
+//		 애초에 Post에 image 포함 여부 항목이 있었어야 했다.. // 전부 수정하는 것은 너무 복잡
+		logger.info("BoardController.getPost() : 이미지 리스트 불러오기 성공");
+
+
+		// return값으로 postDto, imageList 전달
+		return PostResponseDto.builder()
+			.status(HttpStatus.OK)
+			.message("게시글 불러오기 성공")
+			.postDto(postDto)
+			.imageList(imageList)
+			.build();
+	}
 
 //	@PostMapping("/board/registerImage")
 //	public void uploadImage() { // 이미지 등록 메소드를 별도 처리?

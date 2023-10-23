@@ -209,7 +209,7 @@ public class BoardServiceTest {
 	}
 
 	@Test
-	@DisplayName("게시글_이미지_조회_성공")
+	@DisplayName("게시글_리스트_이미지_조회_성공")
 	void getPostImageSuccess() {
 		given(boardDao.findImageByPostNum(postNum)).willReturn(imageEntity);
 
@@ -221,7 +221,7 @@ public class BoardServiceTest {
 	}
 
 	@Test
-	@DisplayName("게시글_이미지_조회_실패")
+	@DisplayName("게시글_리스트_이미지_조회_실패")
 	void getPostImageFailure() {
 		given(boardDao.findImageByPostNum(postNum)).willReturn(null);
 
@@ -262,5 +262,60 @@ public class BoardServiceTest {
 		Assertions.assertEquals(exception.getMessage(), "검색 결과 목록을 불러오지 못했습니다.");
 
 		verify(boardDao).findPostSearchList(any(String.class), any(Pageable.class));
+	}
+
+	@Test
+	@DisplayName("게시글_조회_성공")
+	void getPostSuccess() {
+		given(boardDao.findPostByPostNum(postNum)).willReturn(postEntity);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(PostDto.toPostDto(postEntity).toString(), boardService.getPost(postNum).toString());
+
+		verify(boardDao).findPostByPostNum(postNum);
+	}
+
+	@Test
+	@DisplayName("게시글_조회_실패")
+	void getPostFailure() {
+		given(boardDao.findPostByPostNum(postNum)).willReturn(null);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.getPost(postNum);
+		});
+		Assertions.assertEquals(exception.getMessage(), "게시글을 찾을 수 없습니다.");
+
+		verify(boardDao).findPostByPostNum(postNum);
+	}
+
+	@Test
+	@DisplayName("게시글_이미지_리스트_조회_성공")
+	void getPostImageListSuccess() {
+		given(boardDao.findImageListByPostNum(postNum)).willReturn(imageEntities);
+
+		List<ImageDto> imageList = new ArrayList<>();
+		for (ImageEntity image : imageEntities) {
+			imageList.add(ImageDto.toImageDto(image));
+		}
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(imageList.toString(), boardService.getPostImageList(postNum).toString());
+
+		verify(boardDao).findImageListByPostNum(postNum);
+	}
+
+	@Test
+	@DisplayName("게시글_이미지_리스트_조회_실패")
+	void getPostImageListFailure() {
+		given(boardDao.findImageListByPostNum(postNum)).willReturn(null);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.getPostImageList(postNum);
+		});
+		Assertions.assertEquals(exception.getMessage(), "이미지를 불러오지 못했습니다.");
+
+		verify(boardDao).findImageListByPostNum(postNum);
 	}
 }
