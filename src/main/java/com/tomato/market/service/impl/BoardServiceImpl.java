@@ -41,6 +41,7 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public PostDto writePost(PostDto postDto) {
 		logger.info("BoardServiceImpl.writePost() is called");
+
 		// DTO -> Entity 전환
 		PostEntity postEntity = PostDto.toPostEntity(postDto);
 
@@ -77,7 +78,7 @@ public class BoardServiceImpl implements BoardService {
 			}
 			logger.info("BoardServiceImpl.uploadImages() : 이미지 파일 저장 성공");
 
-//			 DB에 파일 정보 저장
+			// DB에 파일 정보 저장
 			ImageEntity imageEntity =
 				ImageEntity.builder().postNum(postNum).imageName(file.getOriginalFilename()).uuid(fileName).build();
 			ImageEntity saveResult = boardDao.saveImage(imageEntity); // 어떤 식으로 저장되는지 repository 분리?
@@ -89,7 +90,6 @@ public class BoardServiceImpl implements BoardService {
 		}
 
 		logger.info("BoardServiceImpl.uploadImages() : 모든 이미지 저장 성공");
-//		return null;
 	}
 
 	@Override

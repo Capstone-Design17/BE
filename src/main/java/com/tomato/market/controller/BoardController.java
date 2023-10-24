@@ -76,7 +76,7 @@ public class BoardController {
 			.build();
 	}
 
-	// 조회 삭제 수정 : 각각 별도 이슈로 분리?
+	// 조회 삭제 수정 : 각각 별도 이슈로 분리
 //	PutMapping?
 //	updatePost() {}
 
@@ -125,7 +125,6 @@ public class BoardController {
 		// Return
 		// 게시글 List 첨부
 		// 이미지 List 첨부
-		// 하나의 응답 DTO로 변환하여 반환
 		return PostListResponseDto.builder()
 			.status(HttpStatus.OK)
 			.message("게시글 리스트 불러오기 성공")
@@ -139,14 +138,14 @@ public class BoardController {
 	public PostResponseDto getPost(Integer postNum) { // 게시글 조회
 		logger.info("BoardController.getPost() is called");
 
-		// 특정 값(postNum?)을 받아 그 내용을 조회 -> front가 postNum을 알고 있나?? 알고있을듯
+		// 특정 값(postNum)을 받아 그 내용을 조회
 		PostDto postDto = boardService.getPost(postNum);
 		logger.info("BoardController.getPost() : 게시글 불러오기 성공");
 
 
 		// postNum으로 Image 데이터(다수) 조회
 		List<ImageDto> imageList = boardService.getPostImageList(postNum);
-//		 애초에 Post에 image 포함 여부 항목이 있었어야 했다.. // 전부 수정하는 것은 너무 복잡
+		// 애초에 Post에 image 포함 여부 항목이 있었어야 했다.. // 전부 수정하는 것은 너무 복잡
 		logger.info("BoardController.getPost() : 이미지 리스트 불러오기 성공");
 
 
@@ -158,25 +157,4 @@ public class BoardController {
 			.imageList(imageList)
 			.build();
 	}
-
-//	@PostMapping("/board/registerImage")
-//	public void uploadImage() { // 이미지 등록 메소드를 별도 처리?
-//		// 게시글 이미지 저장 관련 코드
-//		// 이미지는 다른 controller 메소드 사용
-//		// multiPartFile로 받음 .getOriginalFilename(),
-//		// 이미지는 각각 uuid를 가짐
-//		// File 객체 생성, uuid+주소
-//		// .transferTo()로 서버에 저장
-//
-//		// 경로를 기준, base64?
-//
-//
-//		// 게시글 이미지 조회 관련 코드
-//		// List<ImageDto> list = findPostImageListById(postId)
-//		// for() { list.add
-//		// 	if(image == null) { .add(default Image)
-//
-//	}
-
-
 }
