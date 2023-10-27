@@ -1,5 +1,7 @@
 package com.tomato.market.data.dto;
 
+import com.tomato.market.data.entity.RoomEntity;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,4 +18,23 @@ public class RoomDto {
 	private String sellerId;
 	private String userId;
 	private Integer postNum;
+
+	public static RoomEntity toRoomEntity(RoomDto roomDto) {
+
+		return RoomEntity.builder()
+			.roomNum(roomDto.roomNum)
+			.sellerId(roomDto.sellerId)
+			.userId(roomDto.userId)
+			.postNum(roomDto.postNum)
+			.build();
+	}
+
+	public static RoomDto toRoomDto(RoomEntity roomEntity) {
+		return RoomDto.builder()
+			.roomNum(roomEntity.getRoomNum())
+			.sellerId(roomEntity.getSellerId())
+			.userId(roomEntity.getUserId())
+			.postNum(roomEntity.getPostNum())
+			.build();
+	}
 }

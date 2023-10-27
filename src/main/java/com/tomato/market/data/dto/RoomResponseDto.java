@@ -1,5 +1,7 @@
 package com.tomato.market.data.dto;
 
+import org.springframework.http.HttpStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,13 +12,11 @@ import lombok.ToString;
 @Builder
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @ToString
-public class ChatDto {
-	//	private Integer chatNum;
-	private Integer roomNum;
-	private String sender;
-	private String message;
-	private String createdAt; // String
+@AllArgsConstructor
+@NoArgsConstructor
+public class RoomResponseDto {
+	HttpStatus status;
+	Object message;
+	Object roomDto;
 }
