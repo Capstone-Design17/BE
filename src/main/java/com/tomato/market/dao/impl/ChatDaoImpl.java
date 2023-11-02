@@ -1,5 +1,7 @@
 package com.tomato.market.dao.impl;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tomato.market.dao.ChatDao;
-import com.tomato.market.data.document.ChatDocument;
+import com.tomato.market.data.collection.ChatCollection;
 import com.tomato.market.data.entity.RoomEntity;
 import com.tomato.market.data.repository.ChatRepository;
 import com.tomato.market.data.repository.RoomRepository;
@@ -56,16 +58,30 @@ public class ChatDaoImpl implements ChatDao {
 	}
 
 	@Override
-	public ChatDocument save(ChatDocument chatDocument) {
+	public ChatCollection save(ChatCollection chatCollection) {
 		logger.info("ChatDaoImpl.save() is called");
 		// MongoDB에 Chat 저장
-		ChatDocument savedChat = chatRepository.save(chatDocument);
+		ChatCollection savedChat = chatRepository.save(chatCollection);
 		if (savedChat == null) {
 			logger.warn("ChatDaoImpl.save() : 채팅 저장 실패");
 			return null;
 		} else {
 			logger.info("ChatDaoImpl.save() : 채팅 저장 성공");
 			return savedChat;
+		}
+	}
+
+	@Override
+	public List<ChatCollection> findByRoomId(String roomId) {
+		logger.info("ChatDaoImpl.findByRoomId() is called");
+
+		List<ChatCollection> result = chatRepository.findByRoomId(roomId);
+		if (result == null) {
+			logger.warn("ChatDaoImpl.findByRoomId() : 채팅 내역 조회 실패");
+			return null;
+		} else {
+			logger.info("ChatDaoImpl.findByRoomId() : 채팅 내역 조회 성공");
+			return result;
 		}
 	}
 }

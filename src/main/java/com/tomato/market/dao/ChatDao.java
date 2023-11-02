@@ -1,6 +1,8 @@
 package com.tomato.market.dao;
 
-import com.tomato.market.data.document.ChatDocument;
+import java.util.List;
+
+import com.tomato.market.data.collection.ChatCollection;
 import com.tomato.market.data.entity.RoomEntity;
 
 public interface ChatDao {
@@ -8,5 +10,7 @@ public interface ChatDao {
 
 	RoomEntity save(RoomEntity roomEntity);
 
-	ChatDocument save(ChatDocument chatDocument);
+	ChatCollection save(ChatCollection chatCollection);
+
+	List<ChatCollection> findByRoomId(String roomId);
 }

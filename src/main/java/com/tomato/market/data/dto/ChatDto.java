@@ -1,6 +1,6 @@
 package com.tomato.market.data.dto;
 
-import com.tomato.market.data.document.ChatDocument;
+import com.tomato.market.data.collection.ChatCollection;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,8 +22,8 @@ public class ChatDto {
 	private String message;
 	private String createdAt; // String
 
-	public static ChatDocument toChatDocument(ChatDto chatDto) {
-		return ChatDocument.builder()
+	public static ChatCollection toChatCollection(ChatDto chatDto) {
+		return ChatCollection.builder()
 			.roomId(chatDto.roomId)
 			.sender(chatDto.sender)
 			.message(chatDto.message)
@@ -31,12 +31,12 @@ public class ChatDto {
 			.build();
 	}
 
-	public static ChatDto toChatDto(ChatDocument chatDocument) {
+	public static ChatDto toChatDto(ChatCollection chatCollection) {
 		return ChatDto.builder()
-			.roomId(chatDocument.getRoomId())
-			.sender(chatDocument.getSender())
-			.message(chatDocument.getMessage())
-			.createdAt(chatDocument.getCreatedAt())
+			.roomId(chatCollection.getRoomId())
+			.sender(chatCollection.getSender())
+			.message(chatCollection.getMessage())
+			.createdAt(chatCollection.getCreatedAt())
 			.build();
 	}
 }
