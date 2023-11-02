@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -83,11 +82,20 @@ public class ChatController {
 			.build();
 	}
 
-	// 채팅 내역 불러오기
-	@GetMapping("/api/chat/history")
-	public void getHistory(String roomId) {
-//		return HistoryDto.builder().build();
-	}
+	// 채팅방 입장 시 채팅 내역 불러오기
+//	@GetMapping("/api/chat/room")
+//	public ChatListResponseDto getChatList(String roomId) {
+//		logger.info("ChatController.getChatLIst() is called");
+//
+//		// RoomId로 MongoDB에서 채팅 내력 리스트 반환
+//		logger.info("ChatController.getChatLIst() : ChatList 호출");
+//		chatService.getChatList(roomId);
+//
+//		// Response 객체에 담아 반환
+//		return ChatListResponseDto.builder()
+//			.chatList(chatList)
+//			.build();
+//	}
 
 	// 채팅 테스트용 메소드
 	@MessageMapping("/hello")
@@ -108,15 +116,18 @@ public class ChatController {
 
 		// Service에서 처리?
 		// 1. Message를 받은 시간을 등록
+		logger.info("ChatController.sendMessage() : 현재 시간 등록");
 		LocalDateTime now = LocalDateTime.now();
 		String date = now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
 		chatDto.setCreatedAt(date);
 
-		// 2. Message를 Text File에 저장
+		// 2. Message를 MongoDb에 저장
+		logger.info("ChatController.sendMessage() : 데이터 저장 시도");
+		chatService.saveChat(chatDto);
 
 		// RoomNum으로 URL을 생성
 		// URL로 Message 전송
-//		return chatDto; // @SendTo에 설정된 경로로 리턴
+		logger.info("ChatController.sendMessage() : 채팅 전송");
 		simpMessagingTemplate.convertAndSend("/topic/chat/" + chatDto.getRoomId(), chatDto);
 	}
 }

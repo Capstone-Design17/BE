@@ -9,8 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tomato.market.dao.ChatDao;
+import com.tomato.market.data.document.ChatDocument;
+import com.tomato.market.data.dto.ChatDto;
 import com.tomato.market.data.dto.RoomDto;
 import com.tomato.market.data.entity.RoomEntity;
+import com.tomato.market.handler.exception.ChatException;
 import com.tomato.market.service.ChatService;
 
 @Service
@@ -40,12 +43,24 @@ public class ChatServiceImpl implements ChatService {
 				uuid + "+" + roomDto.getPostNum() + "_" + roomDto.getSellerId() + "_" + roomDto.getUserId();
 			roomDto.setRoomId(roomId);
 			result = chatDao.save(RoomDto.toRoomEntity(roomDto));
-
-			// 대화를 저장할 Text File 생성 : 상품아이디, 채팅방아이디 조합한 파일명
-			// 추후 작업
 		}
 
 		return RoomDto.toRoomDto(result);
 	}
 
+	@Override
+	public void saveChat(ChatDto chatDto) {
+		logger.info("ChatService.saveChat() is called");
+
+		ChatDocument chatDocument = ChatDto.toChatDocument(chatDto);
+		// 받은 Chat을 RoomId로 MongoDB에 저장
+		ChatDocument result = chatDao.save(chatDocument);
+		if (result == null) {
+			logger.warn("ChatService.saveChat() : 채팅 저장 실패");
+			throw new ChatException("채팅을 저장하지 못했습니다.");
+		}
+
+		logger.info("ChatService.saveChat() : 저장된 채팅 확인-" + result);
+
+	}
 }
