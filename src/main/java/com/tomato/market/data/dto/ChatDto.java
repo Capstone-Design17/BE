@@ -15,7 +15,7 @@ import lombok.ToString;
 @ToString
 public class ChatDto {
 	//	private Integer chatNum;
-	private Integer roomNum;
+	private String roomId;
 	private String sender;
 	private String message;
 	private String createdAt; // String

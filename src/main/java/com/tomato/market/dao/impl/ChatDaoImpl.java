@@ -24,15 +24,15 @@ public class ChatDaoImpl implements ChatDao {
 	}
 
 	@Override
-	public RoomEntity findRoomNum(String userId, Integer postNum) {
-		logger.info("ChatDaoImpl.findRoomNum() is called");
+	public RoomEntity findRoomId(String userId, Integer postNum) {
+		logger.info("ChatDaoImpl.findRoomId() is called");
 
 		RoomEntity roomEntity = roomRepository.findByUserIdAndPostNum(userId, postNum);
 		if (roomEntity == null) {
-			logger.info("ChatDaoImpl.findRoomNum() : roomNum을 찾지 못함");
+			logger.info("ChatDaoImpl.findRoomId() : roomId를 찾지 못함");
 			return null;
 		} else {
-			logger.info("ChatDaoImpl.findRoomNum() : roomNum을 찾음");
+			logger.info("ChatDaoImpl.findRoomId() : roomId를 찾음");
 			return roomEntity;
 		}
 

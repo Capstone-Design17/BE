@@ -20,7 +20,7 @@ public class RoomEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer roomNum;
-
+	private String roomId;
 	private String sellerId;
 	private String userId;
 	private Integer postNum;

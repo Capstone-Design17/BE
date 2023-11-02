@@ -15,6 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RoomDto {
 	private Integer roomNum;
+	private String roomId;
 	private String sellerId;
 	private String userId;
 	private Integer postNum;
@@ -23,6 +24,7 @@ public class RoomDto {
 
 		return RoomEntity.builder()
 			.roomNum(roomDto.roomNum)
+			.roomId(roomDto.roomId)
 			.sellerId(roomDto.sellerId)
 			.userId(roomDto.userId)
 			.postNum(roomDto.postNum)
@@ -32,6 +34,7 @@ public class RoomDto {
 	public static RoomDto toRoomDto(RoomEntity roomEntity) {
 		return RoomDto.builder()
 			.roomNum(roomEntity.getRoomNum())
+			.roomId(roomEntity.getRoomId())
 			.sellerId(roomEntity.getSellerId())
 			.userId(roomEntity.getUserId())
 			.postNum(roomEntity.getPostNum())

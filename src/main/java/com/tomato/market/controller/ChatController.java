@@ -11,7 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tomato.market.data.dto.ChatDto;
@@ -66,13 +68,14 @@ public class ChatController {
 
 
 	// 채팅하기 버튼을 눌렀을 때
-	@PostMapping("/chat/createRoom")
-	public RoomResponseDto createRoom(RoomDto roomDto) { // 채팅방 생성
+	@PostMapping("/api/chat/room")
+	public RoomResponseDto createRoom(@RequestBody RoomDto roomDto) { // 채팅방 생성
 		logger.info("ChatController.createRoom() is called");
 		// PostNum, userId로 기존의 Room의 존재를 찾음
 		RoomDto room = chatService.createRoom(roomDto);
 
 		// RoomNum이 포함된 RoomDto 반환 // roomId만 반환할수도
+		logger.info("ChatController.createRoom() : roomId 반환");
 		return RoomResponseDto.builder()
 			.status(HttpStatus.OK)
 			.message("채팅방 불러오기 성공")
@@ -81,10 +84,10 @@ public class ChatController {
 	}
 
 	// 채팅 내역 불러오기
-//	@GetMapping("/chat/getHistory")
-//	public void getHistory(String roomId) {
-//
-//	}
+	@GetMapping("/api/chat/history")
+	public void getHistory(String roomId) {
+//		return HistoryDto.builder().build();
+	}
 
 	// 채팅 테스트용 메소드
 	@MessageMapping("/hello")
@@ -100,11 +103,11 @@ public class ChatController {
 	@MessageMapping("/chat")
 	public void sendMessage(ChatDto chatDto, String roomId) throws ParseException {
 		logger.info("ChatController.sendMessage() is called");
-		logger.info("ChatController.sendMessage() : room" + chatDto.getRoomNum() + "로 수신");
+		logger.info("ChatController.sendMessage() : room" + chatDto.getRoomId() + "로 송신");
 		// 채팅방 Room 번호와 전송할 Message를 받음
 
 		// Service에서 처리?
-		// 1. Message를 받은 시간을 등록 : CurrentTimeStamp()
+		// 1. Message를 받은 시간을 등록
 		LocalDateTime now = LocalDateTime.now();
 		String date = now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
 		chatDto.setCreatedAt(date);
@@ -114,6 +117,6 @@ public class ChatController {
 		// RoomNum으로 URL을 생성
 		// URL로 Message 전송
 //		return chatDto; // @SendTo에 설정된 경로로 리턴
-		simpMessagingTemplate.convertAndSend("/topic/chat/" + chatDto.getRoomNum(), chatDto);
+		simpMessagingTemplate.convertAndSend("/topic/chat/" + chatDto.getRoomId(), chatDto);
 	}
 }
