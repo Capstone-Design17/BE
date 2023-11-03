@@ -35,7 +35,6 @@ public class ChatServiceImpl implements ChatService {
 		logger.info("ChatServiceImpl.createRoom() is called");
 		// Room
 		// UserId와 PostId로 생성된 채팅방 확인
-//		RoomEntity roomEntity = RoomDto.toRoomEntity(roomDto);
 		RoomEntity result = chatDao.findRoomId(roomDto.getUserId(), roomDto.getPostNum());
 		if (result == null) { // 생성된 방이 없음
 			logger.info("ChatServiceImpl.createRoom() : roomId를 찾지 못함, 새 room 생성");

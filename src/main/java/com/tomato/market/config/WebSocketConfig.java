@@ -32,4 +32,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer { // ST
 		// @MessageMapping으로 라우팅해서 Controller에서 처리할 Destination
 		registry.setApplicationDestinationPrefixes("/app"); // pub
 	}
+
 }

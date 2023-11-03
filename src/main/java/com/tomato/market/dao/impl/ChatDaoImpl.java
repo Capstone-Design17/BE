@@ -76,10 +76,12 @@ public class ChatDaoImpl implements ChatDao {
 		logger.info("ChatDaoImpl.findByRoomId() is called");
 
 		List<ChatCollection> result = chatRepository.findByRoomId(roomId);
+		logger.info("roomId: " + roomId);
+		logger.info(result.toString());
 		if (result == null) {
 			logger.warn("ChatDaoImpl.findByRoomId() : 채팅 내역 조회 실패");
 			return null;
-		} else {
+		} else { // 채팅 내역이 없는 경우 포함, size == 0
 			logger.info("ChatDaoImpl.findByRoomId() : 채팅 내역 조회 성공");
 			return result;
 		}

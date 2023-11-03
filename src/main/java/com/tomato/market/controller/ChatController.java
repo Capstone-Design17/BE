@@ -14,6 +14,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tomato.market.data.dto.ChatDto;
@@ -21,6 +22,8 @@ import com.tomato.market.data.dto.ChatListResponseDto;
 import com.tomato.market.data.dto.RoomDto;
 import com.tomato.market.data.dto.RoomResponseDto;
 import com.tomato.market.service.ChatService;
+
+import jakarta.validation.Valid;
 
 @RestController // nginx proxy를 위해 필요
 public class ChatController {
@@ -64,10 +67,12 @@ public class ChatController {
 
 	// 채팅하기 버튼을 눌렀을 때
 	@PostMapping("/api/chat/room")
-	public RoomResponseDto createRoom(@RequestBody RoomDto roomDto) { // 채팅방 생성
+	public RoomResponseDto createRoom(@RequestBody @Valid RoomDto roomDto) { // 채팅방 생성 // Validation?
 		logger.info("ChatController.createRoom() is called");
+		logger.info("ChatController.createRoom() : " + roomDto.toString());
 		// PostNum, userId로 기존의 Room의 존재를 찾음
 		RoomDto room = chatService.createRoom(roomDto);
+		logger.info("ChatController.createRoom() : " + room);
 
 		// RoomNum이 포함된 RoomDto 반환 // roomId만 반환할수도
 		logger.info("ChatController.createRoom() : roomId 반환");
@@ -80,7 +85,7 @@ public class ChatController {
 
 	// 채팅방 입장 시 채팅 내역 불러오기
 	@GetMapping("/api/chat/room")
-	public ChatListResponseDto getChatList(String roomId) {
+	public ChatListResponseDto getChatList(@RequestParam String roomId) {
 		logger.info("ChatController.getChatLIst() is called");
 
 		// RoomId로 MongoDB에서 채팅 내력 리스트 반환
