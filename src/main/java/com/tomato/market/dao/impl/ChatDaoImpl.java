@@ -13,7 +13,6 @@ import com.tomato.market.data.collection.ChatCollection;
 import com.tomato.market.data.entity.RoomEntity;
 import com.tomato.market.data.repository.ChatRepository;
 import com.tomato.market.data.repository.RoomRepository;
-import com.tomato.market.handler.exception.ChatException;
 
 @Service
 @Transactional
@@ -51,7 +50,7 @@ public class ChatDaoImpl implements ChatDao {
 		RoomEntity result = roomRepository.save(roomEntity);
 		if (result == null) {
 			logger.warn("ChatDaoImpl.save() : 데이터 저장 실패");
-			throw new ChatException("채팅방 생성에 실패했습니다.");
+			return null;
 		}
 		logger.info("ChatDaoImpl.save() : 데이터 저장 성공");
 		return result;

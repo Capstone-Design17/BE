@@ -44,6 +44,10 @@ public class ChatServiceImpl implements ChatService {
 				uuid + "+" + roomDto.getPostNum() + "_" + roomDto.getSellerId() + "_" + roomDto.getUserId();
 			roomDto.setRoomId(roomId);
 			result = chatDao.save(RoomDto.toRoomEntity(roomDto));
+			if (result == null) {
+				logger.warn("ChatServiceImpl.createRoom() : roomId 생성 실패");
+				throw new ChatException("채팅방을 생성하지 못했습니다.");
+			}
 		}
 
 		return RoomDto.toRoomDto(result);
