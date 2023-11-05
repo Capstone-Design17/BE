@@ -139,14 +139,14 @@ public class ChatController {
 		logger.info("ChatController.getRoomList() is called");
 		// 내가 판매중인, 구매중인 채팅 내역을 모두 가져와야 함
 		// RoomEntity의 SellerId, UserId를 모두 검색 -> JOIN?, 최신(역순)으로 출력
+		// 최신 채팅을 기준으로 출력해야 하지만, 시간 상 그냥 출력하기로 결정
 		// FRONT에서 SellerId와 UserId가 같으면 Disabled 처리 해뒀음
 
 		// 채팅 목록 조회
 		List<RoomDto> roomList = chatService.getRoomList(userId);
 		logger.info("ChatController.getRoomList() : 채팅 목록 조회 성공");
+
 		// 각 채팅의 썸네일 이미지 조회
-
-
 		// BoardService 가져다 쓰기?
 		// 찾은 RoomList에서 각 Post의 ID로 Image를 찾음
 		List<ImageDto> imageList = new ArrayList<>();
