@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tomato.market.data.dto.ChatDto;
 import com.tomato.market.data.dto.RoomDto;
 import com.tomato.market.handler.exception.ChatException;
+import com.tomato.market.service.impl.BoardServiceImpl;
 import com.tomato.market.service.impl.ChatServiceImpl;
 
 @WebMvcTest(ChatController.class)
@@ -42,6 +43,8 @@ public class ChatControllerTest {
 	private MockMvc mockmvc;
 	@MockBean
 	private ChatServiceImpl chatService;
+	@MockBean
+	private BoardServiceImpl boardService;
 	@MockBean
 	private SimpMessagingTemplate simpMessagingTemplate;
 	@Autowired
@@ -183,7 +186,7 @@ public class ChatControllerTest {
 		// 전송 실패는 없음, 원하지 않은 곳으로 전송될 뿐임
 		doNothing().when(simpMessagingTemplate).convertAndSend(any(String.class), any(ChatDto.class));
 
-		ChatController chatController = new ChatController(chatService, simpMessagingTemplate);
+		ChatController chatController = new ChatController(chatService, boardService, simpMessagingTemplate);
 		chatController.sendMessage(chatDto, roomId);
 
 		verify(chatService).saveChat(chatDto);
@@ -195,7 +198,7 @@ public class ChatControllerTest {
 	void saveMessageFailure() throws ParseException {
 		doThrow(new ChatException("채팅을 저장하지 못했습니다.")).when(chatService).saveChat(chatDto);
 
-		ChatController chatController = new ChatController(chatService, simpMessagingTemplate);
+		ChatController chatController = new ChatController(chatService, boardService, simpMessagingTemplate);
 		ChatException exception = Assertions.assertThrows(ChatException.class, () -> {
 			chatController.sendMessage(chatDto, roomId);
 		});

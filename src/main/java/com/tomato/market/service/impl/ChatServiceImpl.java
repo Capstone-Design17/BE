@@ -87,4 +87,26 @@ public class ChatServiceImpl implements ChatService {
 
 		return chatDtoList;
 	}
+
+	public List<RoomDto> getRoomList(String userId) {
+		logger.info("ChatServiceImpl.getRoomList() is called");
+
+		List<RoomEntity> roomEntities = chatDao.findBySellerIdOrUserId(userId, userId);
+		if (roomEntities == null) {
+			logger.warn("ChatServiceImpl.getRoomList() : 채팅 목록 조회 실패");
+			throw new ChatException("채팅 목록 조회에 실패했습니다.");
+		}
+
+		// roomEntities.size() == 0일 수 있음
+		logger.warn("ChatServiceImpl.getRoomList() : 채팅 목록 조회 성공");
+		// Entity -> DTO 변환
+		List<RoomDto> roomDtoList = new ArrayList<>();
+		for (RoomEntity roomEntity : roomEntities) {
+			roomDtoList.add(
+				RoomDto.toRoomDto(roomEntity)
+			);
+		}
+
+		return roomDtoList;
+	}
 }

@@ -85,4 +85,18 @@ public class ChatDaoImpl implements ChatDao {
 			return result;
 		}
 	}
+
+	@Override
+	public List<RoomEntity> findBySellerIdOrUserId(String sellerId, String userId) {
+		logger.info("ChatDaoImpl.findBySellerIdOrUserId() is called");
+
+		List<RoomEntity> roomEntities = roomRepository.findBySellerIdOrUserId(sellerId, userId);
+		if (roomEntities == null) {
+			logger.warn("ChatDaoImpl.findBySellerIdOrUserId() : 채팅 목록 조회 실패");
+			return null;
+		} else {
+			logger.info("ChatDaoImpl.findBySellerIdOrUserId() : 채팅 목록 조회 성공");
+			return roomEntities;
+		}
+	}
 }

@@ -3,6 +3,7 @@ package com.tomato.market.controller;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -19,8 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tomato.market.data.dto.ChatDto;
 import com.tomato.market.data.dto.ChatListResponseDto;
+import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.RoomDto;
+import com.tomato.market.data.dto.RoomListResponseDto;
 import com.tomato.market.data.dto.RoomResponseDto;
+import com.tomato.market.service.BoardService;
 import com.tomato.market.service.ChatService;
 
 import jakarta.validation.Valid;
@@ -57,11 +61,16 @@ public class ChatController {
 
 	private Logger logger = LoggerFactory.getLogger(ChatController.class);
 	private ChatService chatService;
+
+	// PostImage를 불러오기 위해 BoardService의 코드를 가져다 씀, 옳은 방식인지는 모르겠다
+	private BoardService boardService;
 	private final SimpMessagingTemplate simpMessagingTemplate;
 
 	@Autowired
-	public ChatController(ChatService chatService, SimpMessagingTemplate simpMessagingTemplate) {
+	public ChatController(
+		ChatService chatService, BoardService boardService, SimpMessagingTemplate simpMessagingTemplate) {
 		this.chatService = chatService;
+		this.boardService = boardService;
 		this.simpMessagingTemplate = simpMessagingTemplate;
 	}
 
@@ -122,5 +131,36 @@ public class ChatController {
 		// URL로 Message 전송
 		logger.info("ChatController.sendMessage() : 채팅 전송");
 		simpMessagingTemplate.convertAndSend("/topic/chat/" + chatDto.getRoomId(), chatDto);
+	}
+
+	// 채팅방 내역 불러오기
+	@GetMapping("/api/chat/list")
+	public RoomListResponseDto getRoomList(String userId) {
+		logger.info("ChatController.getRoomList() is called");
+		// 내가 판매중인, 구매중인 채팅 내역을 모두 가져와야 함
+		// RoomEntity의 SellerId, UserId를 모두 검색 -> JOIN?, 최신(역순)으로 출력
+		// FRONT에서 SellerId와 UserId가 같으면 Disabled 처리 해뒀음
+
+		// 채팅 목록 조회
+		List<RoomDto> roomList = chatService.getRoomList(userId);
+		logger.info("ChatController.getRoomList() : 채팅 목록 조회 성공");
+		// 각 채팅의 썸네일 이미지 조회
+
+
+		// BoardService 가져다 쓰기?
+		// 찾은 RoomList에서 각 Post의 ID로 Image를 찾음
+		List<ImageDto> imageList = new ArrayList<>();
+		for (RoomDto roomDto : roomList) {
+			// 썸네일로 사용할 Image 1개만 필요
+			imageList.add(boardService.getPostImage(roomDto.getPostNum()));
+		}
+		logger.info("BoardController.getPostList() : 게시글의 이미지 정보를 찾음");
+
+		return RoomListResponseDto.builder()
+			.status(HttpStatus.OK)
+			.message("채팅 목록 조회 성공")
+			.roomList(roomList)
+			.imageList(imageList)
+			.build();
 	}
 }

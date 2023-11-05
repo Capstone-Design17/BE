@@ -11,4 +11,6 @@ public interface ChatService {
 	public void saveChat(ChatDto chatDto);
 
 	public List<ChatDto> getChatList(String roomId);
+
+	public List<RoomDto> getRoomList(String userId);
 }
