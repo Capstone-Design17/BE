@@ -95,10 +95,10 @@ public class ChatController {
 	// 채팅방 입장 시 채팅 내역 불러오기
 	@GetMapping("/api/chat/room")
 	public ChatListResponseDto getChatList(@RequestParam String roomId) {
-		logger.info("ChatController.getChatLIst() is called");
+		logger.info("ChatController.getChatList() is called");
 
 		// RoomId로 MongoDB에서 채팅 내력 리스트 반환
-		logger.info("ChatController.getChatLIst() : ChatList 호출");
+		logger.info("ChatController.getChatList() : ChatList 호출");
 		List<ChatDto> chatList = chatService.getChatList(roomId);
 
 		logger.info(chatList.toString());
@@ -156,11 +156,27 @@ public class ChatController {
 		}
 		logger.info("BoardController.getPostList() : 게시글의 이미지 정보를 찾음");
 
+		// 마지막 채팅 정보 조회
+		// Message, CreatedAt
+		// 리스트들의 개수가 일치해야 함, 채팅 내역이 없어도 리스트에는 추가
+		// 어떻게 최신 내역 1개만 가져오는가
+		// 내림차순 조회 + 0번 선택?
+		// 최신순 정렬은 어떻게? front에서 처리?
+		List<ChatDto> chatList = new ArrayList<>();
+		for (RoomDto roomDto : roomList) {
+			List<ChatDto> chats = chatService.getChatList(roomDto.getRoomId());
+			if (chats.size() == 0) {
+				chats.add(ChatDto.builder().message("No Data").build());
+			}
+			chatList.add(chats.get(chats.size() - 1)); // size or size-1
+		}
+
 		return RoomListResponseDto.builder()
 			.status(HttpStatus.OK)
 			.message("채팅 목록 조회 성공")
 			.roomList(roomList)
 			.imageList(imageList)
+			.chatList(chatList)
 			.build();
 	}
 }

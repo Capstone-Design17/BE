@@ -240,6 +240,7 @@ public class ChatControllerTest {
 	void getRoomListSuccess() throws Exception {
 		given(chatService.getRoomList(any(String.class))).willReturn(roomList);
 		given(boardService.getPostImage(any(Integer.class))).willReturn(imageDto);
+		given(chatService.getChatList(any(String.class))).willReturn(chatList);
 
 		mockmvc.perform(get("/api/chat/list").param("userId", userId))
 			.andExpect(status().isOk())
@@ -250,6 +251,7 @@ public class ChatControllerTest {
 
 		verify(chatService).getRoomList(any(String.class));
 		verify(boardService, times(2)).getPostImage(any(Integer.class));
+		verify(chatService, times(2)).getChatList(any(String.class));
 	}
 
 	@Test

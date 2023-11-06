@@ -18,4 +18,5 @@ public class RoomListResponseDto {
 	String message;
 	Object roomList;
 	Object imageList;
+	Object chatList;
 }
