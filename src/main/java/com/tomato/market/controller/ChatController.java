@@ -135,7 +135,7 @@ public class ChatController {
 
 	// 채팅방 내역 불러오기
 	@GetMapping("/api/chat/list")
-	public RoomListResponseDto getRoomList(String userId) {
+	public RoomListResponseDto getRoomList(@RequestParam String userId) {
 		logger.info("ChatController.getRoomList() is called");
 		// 내가 판매중인, 구매중인 채팅 내역을 모두 가져와야 함
 		// RoomEntity의 SellerId, UserId를 모두 검색 -> JOIN?, 최신(역순)으로 출력
@@ -143,6 +143,7 @@ public class ChatController {
 		// FRONT에서 SellerId와 UserId가 같으면 Disabled 처리 해뒀음
 
 		// 채팅 목록 조회
+		logger.info("ChatController.getRoomList() : " + userId + "의 정보를 탐색");
 		List<RoomDto> roomList = chatService.getRoomList(userId);
 		logger.info("ChatController.getRoomList() : 채팅 목록 조회 성공");
 
