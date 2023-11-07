@@ -13,4 +13,6 @@ public interface ChatDao {
 	ChatCollection save(ChatCollection chatCollection);
 
 	List<ChatCollection> findByRoomId(String roomId);
+
+	List<RoomEntity> findBySellerIdOrUserId(String sellerId, String userId);
 }

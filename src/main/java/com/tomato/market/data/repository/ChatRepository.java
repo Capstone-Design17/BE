@@ -8,4 +8,5 @@ import com.tomato.market.data.collection.ChatCollection;
 
 public interface ChatRepository extends MongoRepository<ChatCollection, String> {
 	List<ChatCollection> findByRoomId(String roomId);
+
 }

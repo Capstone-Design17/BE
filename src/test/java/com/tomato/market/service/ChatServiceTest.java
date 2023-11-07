@@ -50,6 +50,9 @@ public class ChatServiceTest {
 	private ChatCollection chatCollection;
 	private List<ChatCollection> chatCollectionList;
 
+	// RoomList
+	private List<RoomEntity> roomEntities;
+
 	@BeforeEach
 	void setUp() {
 		roomDto = RoomDto.builder()
@@ -91,6 +94,10 @@ public class ChatServiceTest {
 		chatCollectionList = new ArrayList<>();
 		chatCollectionList.add(chatCollection);
 		chatCollectionList.add(chatCollection);
+
+		roomEntities = new ArrayList<>();
+		roomEntities.add(roomEntity);
+		roomEntities.add(roomEntity);
 	}
 
 	@Test
@@ -181,5 +188,30 @@ public class ChatServiceTest {
 		Assertions.assertEquals(exception.getMessage(), "채팅 내역 조회에 실패했습니다.");
 
 		verify(chatDao).findByRoomId(roomId);
+	}
+
+	@Test
+	@DisplayName("채팅_목록_조회_성공")
+	void getRoomListSuccess() {
+		given(chatDao.findBySellerIdOrUserId(userId, userId)).willReturn(roomEntities);
+
+		ChatServiceImpl chatService = new ChatServiceImpl(chatDao);
+		Assertions.assertEquals(chatService.getRoomList(userId).size(), 2);
+
+		verify(chatDao).findBySellerIdOrUserId(userId, userId);
+	}
+
+	@Test
+	@DisplayName("채팅_목록_조회_실패")
+	void getRoomListFailure() {
+		given(chatDao.findBySellerIdOrUserId(userId, userId)).willReturn(null);
+
+		ChatServiceImpl chatService = new ChatServiceImpl(chatDao);
+		ChatException exception = Assertions.assertThrows(ChatException.class, () -> {
+			chatService.getRoomList(userId);
+		});
+		Assertions.assertEquals(exception.getMessage(), "채팅 목록 조회에 실패했습니다.");
+
+		verify(chatDao).findBySellerIdOrUserId(userId, userId);
 	}
 }

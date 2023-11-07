@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -32,8 +33,10 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tomato.market.data.dto.ChatDto;
+import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.RoomDto;
 import com.tomato.market.handler.exception.ChatException;
+import com.tomato.market.service.impl.BoardServiceImpl;
 import com.tomato.market.service.impl.ChatServiceImpl;
 
 @WebMvcTest(ChatController.class)
@@ -42,6 +45,8 @@ public class ChatControllerTest {
 	private MockMvc mockmvc;
 	@MockBean
 	private ChatServiceImpl chatService;
+	@MockBean
+	private BoardServiceImpl boardService;
 	@MockBean
 	private SimpMessagingTemplate simpMessagingTemplate;
 	@Autowired
@@ -65,6 +70,17 @@ public class ChatControllerTest {
 
 	// Content
 	private String content;
+
+	// RoomList
+	private List<RoomDto> roomList;
+
+	// Image
+	private ImageDto imageDto;
+	private String imageName = "original.png";
+	private String uuid = "uuidoriginal.png";
+
+	// ImageList
+	private List<ImageDto> imageList;
 
 	@BeforeEach
 	void setUp() {
@@ -102,6 +118,21 @@ public class ChatControllerTest {
 			.sender(sender)
 			.message(message)
 			.build();
+
+
+		roomList = new ArrayList<>();
+		roomList.add(roomDto);
+		roomList.add(roomDto);
+
+		imageDto = ImageDto.builder()
+			.postNum(postNum)
+			.imageName(imageName)
+			.uuid(uuid)
+			.build();
+
+		imageList = new ArrayList<>();
+		imageList.add(imageDto);
+		imageList.add(imageDto);
 	}
 
 	@Test
@@ -183,7 +214,7 @@ public class ChatControllerTest {
 		// 전송 실패는 없음, 원하지 않은 곳으로 전송될 뿐임
 		doNothing().when(simpMessagingTemplate).convertAndSend(any(String.class), any(ChatDto.class));
 
-		ChatController chatController = new ChatController(chatService, simpMessagingTemplate);
+		ChatController chatController = new ChatController(chatService, boardService, simpMessagingTemplate);
 		chatController.sendMessage(chatDto, roomId);
 
 		verify(chatService).saveChat(chatDto);
@@ -195,12 +226,44 @@ public class ChatControllerTest {
 	void saveMessageFailure() throws ParseException {
 		doThrow(new ChatException("채팅을 저장하지 못했습니다.")).when(chatService).saveChat(chatDto);
 
-		ChatController chatController = new ChatController(chatService, simpMessagingTemplate);
+		ChatController chatController = new ChatController(chatService, boardService, simpMessagingTemplate);
 		ChatException exception = Assertions.assertThrows(ChatException.class, () -> {
 			chatController.sendMessage(chatDto, roomId);
 		});
 		Assertions.assertEquals(exception.getMessage(), "채팅을 저장하지 못했습니다.");
 
 		verify(chatService).saveChat(chatDto);
+	}
+
+	@Test
+	@DisplayName("채팅_방_목록_조회_성공")
+	void getRoomListSuccess() throws Exception {
+		given(chatService.getRoomList(any(String.class))).willReturn(roomList);
+		given(boardService.getPostImage(any(Integer.class))).willReturn(imageDto);
+		given(chatService.getChatList(any(String.class))).willReturn(chatList);
+
+		mockmvc.perform(get("/api/chat/list").param("userId", userId))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("채팅 목록 조회 성공")))
+			.andExpect(jsonPath("$.roomList").exists())
+			.andExpect(jsonPath("$.imageList").exists())
+			.andDo(print());
+
+		verify(chatService).getRoomList(any(String.class));
+		verify(boardService, times(2)).getPostImage(any(Integer.class));
+		verify(chatService, times(2)).getChatList(any(String.class));
+	}
+
+	@Test
+	@DisplayName("채팅_방_목록_조회_실패")
+	void getRoomListFailure() throws Exception {
+		given(chatService.getRoomList(any(String.class))).willThrow(new ChatException("채팅 목록 조회에 실패했습니다."));
+
+		mockmvc.perform(get("/api/chat/list").param("userId", userId))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("채팅 목록 조회에 실패했습니다.")))
+			.andDo(print());
+
+		verify(chatService).getRoomList(any(String.class));
 	}
 }

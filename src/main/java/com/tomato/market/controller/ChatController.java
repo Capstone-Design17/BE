@@ -3,6 +3,7 @@ package com.tomato.market.controller;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -19,8 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tomato.market.data.dto.ChatDto;
 import com.tomato.market.data.dto.ChatListResponseDto;
+import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.RoomDto;
+import com.tomato.market.data.dto.RoomListResponseDto;
 import com.tomato.market.data.dto.RoomResponseDto;
+import com.tomato.market.service.BoardService;
 import com.tomato.market.service.ChatService;
 
 import jakarta.validation.Valid;
@@ -57,11 +61,16 @@ public class ChatController {
 
 	private Logger logger = LoggerFactory.getLogger(ChatController.class);
 	private ChatService chatService;
+
+	// PostImage를 불러오기 위해 BoardService의 코드를 가져다 씀, 옳은 방식인지는 모르겠다
+	private BoardService boardService;
 	private final SimpMessagingTemplate simpMessagingTemplate;
 
 	@Autowired
-	public ChatController(ChatService chatService, SimpMessagingTemplate simpMessagingTemplate) {
+	public ChatController(
+		ChatService chatService, BoardService boardService, SimpMessagingTemplate simpMessagingTemplate) {
 		this.chatService = chatService;
+		this.boardService = boardService;
 		this.simpMessagingTemplate = simpMessagingTemplate;
 	}
 
@@ -86,10 +95,10 @@ public class ChatController {
 	// 채팅방 입장 시 채팅 내역 불러오기
 	@GetMapping("/api/chat/room")
 	public ChatListResponseDto getChatList(@RequestParam String roomId) {
-		logger.info("ChatController.getChatLIst() is called");
+		logger.info("ChatController.getChatList() is called");
 
 		// RoomId로 MongoDB에서 채팅 내력 리스트 반환
-		logger.info("ChatController.getChatLIst() : ChatList 호출");
+		logger.info("ChatController.getChatList() : ChatList 호출");
 		List<ChatDto> chatList = chatService.getChatList(roomId);
 
 		logger.info(chatList.toString());
@@ -122,5 +131,53 @@ public class ChatController {
 		// URL로 Message 전송
 		logger.info("ChatController.sendMessage() : 채팅 전송");
 		simpMessagingTemplate.convertAndSend("/topic/chat/" + chatDto.getRoomId(), chatDto);
+	}
+
+	// 채팅방 내역 불러오기
+	@GetMapping("/api/chat/list")
+	public RoomListResponseDto getRoomList(@RequestParam String userId) {
+		logger.info("ChatController.getRoomList() is called");
+		// 내가 판매중인, 구매중인 채팅 내역을 모두 가져와야 함
+		// RoomEntity의 SellerId, UserId를 모두 검색 -> JOIN?, 최신(역순)으로 출력
+		// 최신 채팅을 기준으로 출력해야 하지만, 시간 상 그냥 출력하기로 결정
+		// FRONT에서 SellerId와 UserId가 같으면 Disabled 처리 해뒀음
+
+		// 채팅 목록 조회
+		logger.info("ChatController.getRoomList() : " + userId + "의 정보를 탐색");
+		List<RoomDto> roomList = chatService.getRoomList(userId);
+		logger.info("ChatController.getRoomList() : 채팅 목록 조회 성공");
+
+		// 각 채팅의 썸네일 이미지 조회
+		// BoardService 가져다 쓰기?
+		// 찾은 RoomList에서 각 Post의 ID로 Image를 찾음
+		List<ImageDto> imageList = new ArrayList<>();
+		for (RoomDto roomDto : roomList) {
+			// 썸네일로 사용할 Image 1개만 필요
+			imageList.add(boardService.getPostImage(roomDto.getPostNum()));
+		}
+		logger.info("BoardController.getPostList() : 게시글의 이미지 정보를 찾음");
+
+		// 마지막 채팅 정보 조회
+		// Message, CreatedAt
+		// 리스트들의 개수가 일치해야 함, 채팅 내역이 없어도 리스트에는 추가
+		// 어떻게 최신 내역 1개만 가져오는가
+		// 내림차순 조회 + 0번 선택?
+		// 최신순 정렬은 어떻게? front에서 처리?
+		List<ChatDto> chatList = new ArrayList<>();
+		for (RoomDto roomDto : roomList) {
+			List<ChatDto> chats = chatService.getChatList(roomDto.getRoomId());
+			if (chats.size() == 0) {
+				chats.add(ChatDto.builder().message("No Data").build());
+			}
+			chatList.add(chats.get(chats.size() - 1)); // size or size-1
+		}
+
+		return RoomListResponseDto.builder()
+			.status(HttpStatus.OK)
+			.message("채팅 목록 조회 성공")
+			.roomList(roomList)
+			.imageList(imageList)
+			.chatList(chatList)
+			.build();
 	}
 }
