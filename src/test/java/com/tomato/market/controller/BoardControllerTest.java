@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,11 +31,14 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
 import com.tomato.market.handler.exception.BoardException;
@@ -87,6 +91,9 @@ public class BoardControllerTest {
 	// Search
 	private String keyword = "keyword";
 
+	// Favorite
+	private FavoriteDto favoriteDto;
+
 	@Autowired
 	private WebApplicationContext ctx;
 
@@ -138,6 +145,8 @@ public class BoardControllerTest {
 		// Page
 		postPageList = new PageImpl<>(postList, pageable, 2);
 
+		// Favorite
+		favoriteDto = FavoriteDto.builder().userId(userId).postNum(postNum).status(1).build();
 	}
 
 	@Test
@@ -275,7 +284,6 @@ public class BoardControllerTest {
 		given(boardService.getPostList(any(Pageable.class))).willReturn(postPageList);
 		given(boardService.getPostImage(postNum)).willReturn(imageDto);
 
-
 		mockMvc.perform(get("/api/board/getPostList"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message", is("게시글 리스트 불러오기 성공")))
@@ -376,5 +384,42 @@ public class BoardControllerTest {
 
 		verify(boardService).getPost(postNum);
 		verify(boardService).getPostImageList(postNum);
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_성공")
+	void addFavoriteSuccess() throws Exception {
+		given(boardService.addFavorite(any(String.class), any(Integer.class))).willReturn(favoriteDto);
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("userId", userId);
+		map.add("postNum", postNum.toString());
+
+		mockMvc.perform(post("/api/board/favorite").params(map))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("관심 등록 성공")))
+			.andExpect(jsonPath("$.data.userId", is(userId)))
+			.andDo(print());
+
+		verify(boardService).addFavorite(any(String.class), any(Integer.class));
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_실패")
+	void addFavoriteFailure() throws Exception {
+		given(boardService.addFavorite(any(String.class), any(Integer.class))).willThrow(
+			new BoardException("관심 등록에 실패했습니다."));
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("userId", userId);
+		map.add("postNum", postNum.toString());
+
+		mockMvc.perform(post("/api/board/favorite").params(map))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("관심 등록에 실패했습니다.")))
+			.andDo(print());
+
+		verify(boardService).addFavorite(any(String.class), any(Integer.class));
+
 	}
 }
