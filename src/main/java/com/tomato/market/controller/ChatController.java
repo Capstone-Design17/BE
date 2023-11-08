@@ -160,8 +160,7 @@ public class ChatController {
 		// 마지막 채팅 정보 조회
 		// Message, CreatedAt
 		// 리스트들의 개수가 일치해야 함, 채팅 내역이 없어도 리스트에는 추가
-		// 어떻게 최신 내역 1개만 가져오는가
-		// 내림차순 조회 + 0번 선택?
+		// 어떻게 최신 내역 1개만 선택
 		// 최신순 정렬은 어떻게? front에서 처리?
 		List<ChatDto> chatList = new ArrayList<>();
 		for (RoomDto roomDto : roomList) {
