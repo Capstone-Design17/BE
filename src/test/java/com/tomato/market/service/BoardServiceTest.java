@@ -28,8 +28,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tomato.market.dao.impl.BoardDaoImpl;
+import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
+import com.tomato.market.data.entity.FavoriteEntity;
 import com.tomato.market.data.entity.ImageEntity;
 import com.tomato.market.data.entity.PostEntity;
 import com.tomato.market.handler.exception.BoardException;
@@ -73,6 +75,10 @@ public class BoardServiceTest {
 
 	private Page<PostDto> postDtoPage;
 
+	// Favorite
+	private FavoriteDto favoriteDto;
+	private FavoriteEntity favoriteEntity;
+
 
 	@BeforeEach
 	void setUp() {
@@ -102,6 +108,14 @@ public class BoardServiceTest {
 		postDtoList.add(PostDto.toPostDto(postEntity));
 
 		postDtoPage = new PageImpl<>(postDtoList, pageable, 2);
+
+		favoriteDto = FavoriteDto.builder()
+			.userId(userId)
+			.postNum(postNum)
+			.status(1)
+			.build();
+
+		favoriteEntity = FavoriteDto.toFavoriteEntity(favoriteDto);
 	}
 
 	@Test
@@ -317,5 +331,30 @@ public class BoardServiceTest {
 		Assertions.assertEquals(exception.getMessage(), "이미지를 불러오지 못했습니다.");
 
 		verify(boardDao).findImageListByPostNum(postNum);
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_성공")
+	void addFavoriteSuccess() {
+		given(boardDao.save(any(FavoriteEntity.class))).willReturn(favoriteEntity);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.addFavorite(userId, postNum).toString(), favoriteDto.toString());
+
+		verify(boardDao).save(any(FavoriteEntity.class));
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_실패")
+	void addFavoriteFailure() {
+		given(boardDao.save(any(FavoriteEntity.class))).willReturn(null);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.addFavorite(userId, postNum);
+		});
+		Assertions.assertEquals(exception.getMessage(), "관심 등록에 실패했습니다.");
+
+		verify(boardDao).save(any(FavoriteEntity.class));
 	}
 }
