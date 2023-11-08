@@ -22,11 +22,13 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PageDto;
 import com.tomato.market.data.dto.PostDto;
 import com.tomato.market.data.dto.PostListResponseDto;
 import com.tomato.market.data.dto.PostResponseDto;
+import com.tomato.market.data.dto.ResponseDto;
 import com.tomato.market.service.BoardService;
 
 import jakarta.validation.Valid;
@@ -157,4 +159,29 @@ public class BoardController {
 			.imageList(imageList)
 			.build();
 	}
+
+	// 관심등록
+	/* flow
+		PostDetail에서 버튼을 클릭
+		관심등록(좋아요 +1), 재클릭시 취소(삭제) -> 삭제말고 status로 하는게?
+		각 사용자당 각각 처리되어야 함
+		UserEntity에 ManyToOne : 다 대 일 연관관계 매핑?
+		별도 Table로 분리?
+			UserId, PostNum
+	 */
+
+	@PostMapping("/board/favorite")
+	public ResponseDto<FavoriteDto> addFavorite(String userId, Integer postNum) {
+		logger.info("BoardController.addFavorite() is called");
+
+
+		FavoriteDto favoriteDto = boardService.addFavorite(userId, postNum);
+
+		// 좋아요 전체 개수를 리턴? // boardEntity 자체를 수정?
+		return ResponseDto.<FavoriteDto>builder().status(HttpStatus.OK).message("관심 등록 성공").data(favoriteDto).build();
+	}
+
+	// 관심취소
+//	@PutMapping()?
+
 }
