@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tomato.market.dao.BoardDao;
+import com.tomato.market.data.entity.FavoriteEntity;
 import com.tomato.market.data.entity.ImageEntity;
 import com.tomato.market.data.entity.PostEntity;
+import com.tomato.market.data.repository.FavoriteRepository;
 import com.tomato.market.data.repository.ImageRepository;
 import com.tomato.market.data.repository.PostRepository;
 import com.tomato.market.handler.exception.BoardException;
@@ -26,10 +28,14 @@ public class BoardDaoImpl implements BoardDao {
 	private final PostRepository postRepository;
 	private final ImageRepository imageRepository;
 
+	private final FavoriteRepository favoriteRepository;
+
 	@Autowired
-	public BoardDaoImpl(PostRepository postRepository, ImageRepository imageRepository) {
+	public BoardDaoImpl(PostRepository postRepository, ImageRepository imageRepository,
+						FavoriteRepository favoriteRepository) {
 		this.postRepository = postRepository;
 		this.imageRepository = imageRepository;
+		this.favoriteRepository = favoriteRepository;
 	}
 
 
@@ -128,6 +134,20 @@ public class BoardDaoImpl implements BoardDao {
 		} else {
 			logger.info("BoardDaoImpl.findImageListByPostNum() : 이미지 리스트 조회 성공");
 			return imageEntities;
+		}
+	}
+
+	@Override
+	public FavoriteEntity save(FavoriteEntity favoriteEntity) {
+		logger.info("BoardDaoImpl.save() is called");
+
+		FavoriteEntity result = favoriteRepository.save(favoriteEntity);
+		if (result == null) {
+			logger.warn("BoardDaoImpl.save() : 데이터 저장 실패");
+			return null;
+		} else {
+			logger.info("BoardDaoImpl.save() : 데이터 저장 성공");
+			return result;
 		}
 	}
 }

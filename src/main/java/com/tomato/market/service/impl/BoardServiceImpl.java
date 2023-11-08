@@ -16,8 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tomato.market.dao.BoardDao;
+import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
+import com.tomato.market.data.entity.FavoriteEntity;
 import com.tomato.market.data.entity.ImageEntity;
 import com.tomato.market.data.entity.PostEntity;
 import com.tomato.market.handler.exception.BoardException;
@@ -183,5 +185,20 @@ public class BoardServiceImpl implements BoardService {
 			imageList.add(ImageDto.toImageDto(imageEntity));
 		}
 		return imageList;
+	}
+
+	@Override
+	public FavoriteDto addFavorite(String userId, Integer postNum) {
+		logger.info("BoardServiceImpl.addFavorite() is called");
+
+		FavoriteEntity favoriteEntity = FavoriteEntity.builder().userId(userId).postNum(postNum).build();
+		FavoriteEntity result = boardDao.save(favoriteEntity);
+		if (result == null) {
+			logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 실패");
+			throw new BoardException("관심 등록에 실패했습니다.");
+		}
+
+		logger.info("BoardServiceImpl.addFavorite() : 관심 등록 성공");
+		return FavoriteDto.toFavoriteDto(result);
 	}
 }

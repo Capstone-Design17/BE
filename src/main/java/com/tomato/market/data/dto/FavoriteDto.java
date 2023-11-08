@@ -19,10 +19,18 @@ public class FavoriteDto {
 	private Integer status;
 
 	public static FavoriteDto toFavoriteDto(FavoriteEntity favoriteEntity) {
-		return FavoriteDto.builder().build();
+		return FavoriteDto.builder()
+			.userId(favoriteEntity.getUserId())
+			.postNum(favoriteEntity.getPostNum())
+			.status(favoriteEntity.getStatus())
+			.build();
 	}
 
 	public static FavoriteEntity toFavoriteEntity(FavoriteDto favoriteDto) {
-		return FavoriteEntity.builder().build();
+		return FavoriteEntity.builder()
+			.userId(favoriteDto.getUserId())
+			.postNum(favoriteDto.getPostNum())
+			.status(favoriteDto.getStatus())
+			.build();
 	}
 }

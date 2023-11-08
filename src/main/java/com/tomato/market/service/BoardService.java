@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
 
@@ -24,4 +25,6 @@ public interface BoardService {
 	PostDto getPost(Integer postNum);
 
 	List<ImageDto> getPostImageList(Integer postNum);
+
+	FavoriteDto addFavorite(String userId, Integer postNum);
 }
