@@ -178,9 +178,15 @@ public class BoardController {
 
 		// status가 "on"이면 현재 등록된 상태
 		FavoriteDto favoriteDto = boardService.addFavorite(userId, postNum, status);
+		String message = "";
+		if (favoriteDto.getStatus() == 1) {
+			message = "관심 등록 성공";
+		} else {
+			message = "관심 등록 취소 성공";
+		}
 
 		// 좋아요 전체 개수를 리턴? // boardEntity 자체를 수정?
-		return ResponseDto.<FavoriteDto>builder().status(HttpStatus.OK).message("관심 등록/취소 성공").data(favoriteDto)
+		return ResponseDto.<FavoriteDto>builder().status(HttpStatus.OK).message(message).data(favoriteDto)
 			.build();
 	}
 

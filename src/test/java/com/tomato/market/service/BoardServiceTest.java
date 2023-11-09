@@ -336,10 +336,12 @@ public class BoardServiceTest {
 	@Test
 	@DisplayName("게시글_관심_등록_성공")
 	void addFavoriteSuccess() {
+		favoriteEntity.setStatus(1);
+		favoriteDto.setStatus(1);
 		given(boardDao.save(any(FavoriteEntity.class))).willReturn(favoriteEntity);
 
 		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
-		Assertions.assertEquals(boardService.addFavorite(userId, postNum).toString(), favoriteDto.toString());
+		Assertions.assertEquals(boardService.addFavorite(userId, postNum, 0).toString(), favoriteDto.toString());
 
 		verify(boardDao).save(any(FavoriteEntity.class));
 	}
@@ -351,10 +353,36 @@ public class BoardServiceTest {
 
 		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
 		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
-			boardService.addFavorite(userId, postNum);
+			boardService.addFavorite(userId, postNum, 0);
 		});
 		Assertions.assertEquals(exception.getMessage(), "관심 등록에 실패했습니다.");
 
 		verify(boardDao).save(any(FavoriteEntity.class));
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_취소_성공")
+	void cancelFavoriteSuccess() {
+		favoriteEntity.setStatus(0);
+		favoriteDto.setStatus(0);
+		given(boardDao.findByUserIdAndPostNum(any(String.class), any(Integer.class))).willReturn(favoriteEntity);
+		given(boardDao.save(any(FavoriteEntity.class))).willReturn(favoriteEntity);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.addFavorite(userId, postNum, 1).toString(), favoriteDto.toString());
+
+		verify(boardDao).findByUserIdAndPostNum(any(String.class), any(Integer.class));
+		verify(boardDao).save(any(FavoriteEntity.class));
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_확인_성공")
+	void getFavoriteSuccess() {
+		given(boardDao.findByUserIdAndPostNum(any(String.class), any(Integer.class))).willReturn(favoriteEntity);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.getFavorite(userId, postNum).toString(), favoriteDto.toString());
+
+		verify(boardDao).findByUserIdAndPostNum(any(String.class), any(Integer.class));
 	}
 }
