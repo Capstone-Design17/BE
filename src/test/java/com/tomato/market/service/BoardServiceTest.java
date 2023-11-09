@@ -349,6 +349,7 @@ public class BoardServiceTest {
 	@Test
 	@DisplayName("게시글_관심_등록_실패")
 	void addFavoriteFailure() {
+		given(boardDao.findByUserIdAndPostNum(any(String.class), any(Integer.class))).willReturn(null);
 		given(boardDao.save(any(FavoriteEntity.class))).willReturn(null);
 
 		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
@@ -357,6 +358,7 @@ public class BoardServiceTest {
 		});
 		Assertions.assertEquals(exception.getMessage(), "관심 등록에 실패했습니다.");
 
+		verify(boardDao).findByUserIdAndPostNum(any(String.class), any(Integer.class));
 		verify(boardDao).save(any(FavoriteEntity.class));
 	}
 

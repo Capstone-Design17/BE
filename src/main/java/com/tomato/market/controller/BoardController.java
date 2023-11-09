@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -173,20 +174,22 @@ public class BoardController {
 
 	// 관심 등록/취소
 	@PostMapping("/board/favorite")
-	public ResponseDto<FavoriteDto> addFavorite(String userId, Integer postNum, Integer status) {
+	public ResponseDto<FavoriteDto> addFavorite(@RequestBody FavoriteDto favoriteDto) {
 		logger.info("BoardController.addFavorite() is called");
 
 		// status가 "on"이면 현재 등록된 상태
-		FavoriteDto favoriteDto = boardService.addFavorite(userId, postNum, status);
+		FavoriteDto result = boardService.addFavorite(favoriteDto.getUserId(), favoriteDto.getPostNum(),
+			favoriteDto.getStatus());
 		String message = "";
-		if (favoriteDto.getStatus() == 1) {
+		if (result.getStatus() == 1) {
 			message = "관심 등록 성공";
 		} else {
 			message = "관심 등록 취소 성공";
 		}
+		logger.info(result.toString());
 
 		// 좋아요 전체 개수를 리턴? // boardEntity 자체를 수정?
-		return ResponseDto.<FavoriteDto>builder().status(HttpStatus.OK).message(message).data(favoriteDto)
+		return ResponseDto.<FavoriteDto>builder().status(HttpStatus.OK).message(message).data(result)
 			.build();
 	}
 

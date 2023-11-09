@@ -190,32 +190,39 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public FavoriteDto addFavorite(String userId, Integer postNum, Integer status) {
 		logger.info("BoardServiceImpl.addFavorite() is called");
-
+		logger.info("BoardServiceImpl.addFavorite() : 관심 등록 조회");
+		FavoriteEntity favoriteEntity = boardDao.findByUserIdAndPostNum(userId, postNum);
 		FavoriteEntity result;
-		if (!status.equals(1)) {
-			FavoriteEntity favoriteEntity = FavoriteEntity.builder().userId(userId).postNum(postNum).status(1).build();
-			result = boardDao.save(favoriteEntity);
+		if (favoriteEntity == null) {
+			logger.info("BoardServiceImpl.addFavorite() : 등록된 관심 등록 없음");
+			FavoriteEntity entity = FavoriteEntity.builder().userId(userId).postNum(postNum).status(1).build();
+			result = boardDao.save(entity);
 			if (result == null) {
 				logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 실패");
 				throw new BoardException("관심 등록에 실패했습니다.");
+
 			}
+			logger.info("BoardServiceImpl.addFavorite() : 관심 등록 성공");
 		} else {
-			FavoriteEntity favoriteEntity = boardDao.findByUserIdAndPostNum(userId, postNum);
-			if (favoriteEntity == null) {
-				logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 조회 실패");
-				throw new BoardException("관심 등록 취소에 실패했습니다.");
+			if (status == 1) {
+				favoriteEntity.setStatus(0);
+				result = boardDao.save(favoriteEntity);
+				if (result == null) {
+					logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 취소 실패");
+					throw new BoardException("관심 등록 취소에 실패했습니다.");
+				}
+				logger.info("BoardServiceImpl.addFavorite() : 관심 등록 취소 성공");
+			} else {
+				favoriteEntity.setStatus(1);
+				result = boardDao.save(favoriteEntity);
+				if (result == null) {
+					logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 실패");
+					throw new BoardException("관심 등록에 실패했습니다.");
+				}
+				logger.info("BoardServiceImpl.addFavorite() : 관심 등록 성공");
 			}
-			// update
-			favoriteEntity.setStatus(0);
-			result = boardDao.save(favoriteEntity);
-			if (result == null) {
-				logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 취소 실패");
-				throw new BoardException("관심 등록 취소에 실패했습니다.");
-			}
-			logger.info("BoardServiceImpl.addFavorite() : 데이터 삭제 성공");
 		}
 
-		logger.info("BoardServiceImpl.addFavorite() : 관심 등록/취소 성공");
 		return FavoriteDto.toFavoriteDto(result);
 	}
 

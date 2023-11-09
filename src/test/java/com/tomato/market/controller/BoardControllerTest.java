@@ -390,15 +390,17 @@ public class BoardControllerTest {
 	@Test
 	@DisplayName("게시글_관심_등록_성공")
 	void addFavoriteSuccess() throws Exception {
+		favoriteDto.setStatus(0);
+		content = new ObjectMapper().writeValueAsString(favoriteDto);
+		favoriteDto.setStatus(1);
 		given(boardService.addFavorite(any(String.class), any(Integer.class), any(Integer.class))).willReturn(
 			favoriteDto);
 
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-		map.add("userId", userId);
-		map.add("postNum", postNum.toString());
-		map.add("status", "0");
 
-		mockMvc.perform(post("/api/board/favorite").params(map))
+		mockMvc.perform(post("/api/board/favorite")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(content)
+			)
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message", is("관심 등록 성공")))
 			.andExpect(jsonPath("$.data.userId", is(userId)))
@@ -413,12 +415,12 @@ public class BoardControllerTest {
 		given(boardService.addFavorite(any(String.class), any(Integer.class), any(Integer.class))).willThrow(
 			new BoardException("관심 등록에 실패했습니다."));
 
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-		map.add("userId", userId);
-		map.add("postNum", postNum.toString());
-		map.add("status", "0");
+		content = new ObjectMapper().writeValueAsString(favoriteDto);
 
-		mockMvc.perform(post("/api/board/favorite").params(map))
+		mockMvc.perform(post("/api/board/favorite")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(content)
+			)
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message", is("관심 등록에 실패했습니다.")))
 			.andDo(print());
@@ -430,14 +432,14 @@ public class BoardControllerTest {
 	@Test
 	@DisplayName("게시글_관심_등록_취소_성공")
 	void cancelFavoriteSuccess() throws Exception {
+		content = new ObjectMapper().writeValueAsString(favoriteDto);
 		favoriteDto.setStatus(0);
 		given(boardService.addFavorite(any(String.class), any(Integer.class), eq(1))).willReturn(favoriteDto);
 
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-		map.add("userId", userId);
-		map.add("postNum", postNum.toString());
-		map.add("status", "1");
-		mockMvc.perform(post("/api/board/favorite").params(map))
+		mockMvc.perform(post("/api/board/favorite")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(content)
+			)
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message", is("관심 등록 취소 성공")))
 			.andDo(print());
