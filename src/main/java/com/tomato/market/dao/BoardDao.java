@@ -25,4 +25,6 @@ public interface BoardDao {
 	List<ImageEntity> findImageListByPostNum(Integer postNum);
 
 	FavoriteEntity save(FavoriteEntity favoriteEntity);
+
+	FavoriteEntity findByUserIdAndPostNum(String userId, Integer postNum);
 }

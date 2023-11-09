@@ -170,18 +170,32 @@ public class BoardController {
 			UserId, PostNum
 	 */
 
+
+	// 관심 등록/취소
 	@PostMapping("/board/favorite")
-	public ResponseDto<FavoriteDto> addFavorite(String userId, Integer postNum) {
+	public ResponseDto<FavoriteDto> addFavorite(String userId, Integer postNum, Integer status) {
 		logger.info("BoardController.addFavorite() is called");
 
-
-		FavoriteDto favoriteDto = boardService.addFavorite(userId, postNum);
+		// status가 "on"이면 현재 등록된 상태
+		FavoriteDto favoriteDto = boardService.addFavorite(userId, postNum, status);
 
 		// 좋아요 전체 개수를 리턴? // boardEntity 자체를 수정?
-		return ResponseDto.<FavoriteDto>builder().status(HttpStatus.OK).message("관심 등록 성공").data(favoriteDto).build();
+		return ResponseDto.<FavoriteDto>builder().status(HttpStatus.OK).message("관심 등록/취소 성공").data(favoriteDto)
+			.build();
 	}
 
-	// 관심취소
-//	@PutMapping()?
+	// 관심 등록 확인
+	@GetMapping("/board/favorite")
+	public ResponseDto<FavoriteDto> getFavorite(String userId, Integer postNum) {
+		logger.info("BoardController.getFavorite() is called");
 
+		FavoriteDto favoriteDto = boardService.getFavorite(userId, postNum);
+		logger.info("BoardController.getFavorite() : 관심 등록 조회 성공");
+
+		return ResponseDto.<FavoriteDto>builder()
+			.status(HttpStatus.OK)
+			.message("관심 등록 확인 성공")
+			.data(favoriteDto)
+			.build();
+	}
 }

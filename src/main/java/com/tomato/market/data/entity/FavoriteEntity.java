@@ -1,7 +1,5 @@
 package com.tomato.market.data.entity;
 
-import org.hibernate.annotations.ColumnDefault;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,10 +9,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -26,6 +26,5 @@ public class FavoriteEntity {
 	private Integer favoriteNum;
 	private String userId;
 	private Integer postNum;
-	@ColumnDefault("1")
 	private Integer status; // 1 등록 0 취소
 }

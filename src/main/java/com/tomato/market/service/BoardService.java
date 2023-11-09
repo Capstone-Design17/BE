@@ -26,5 +26,7 @@ public interface BoardService {
 
 	List<ImageDto> getPostImageList(Integer postNum);
 
-	FavoriteDto addFavorite(String userId, Integer postNum);
+	FavoriteDto addFavorite(String userId, Integer postNum, Integer status);
+
+	FavoriteDto getFavorite(String userId, Integer postNum);
 }

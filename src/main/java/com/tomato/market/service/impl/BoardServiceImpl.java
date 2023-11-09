@@ -188,17 +188,46 @@ public class BoardServiceImpl implements BoardService {
 	}
 
 	@Override
-	public FavoriteDto addFavorite(String userId, Integer postNum) {
+	public FavoriteDto addFavorite(String userId, Integer postNum, Integer status) {
 		logger.info("BoardServiceImpl.addFavorite() is called");
 
-		FavoriteEntity favoriteEntity = FavoriteEntity.builder().userId(userId).postNum(postNum).build();
-		FavoriteEntity result = boardDao.save(favoriteEntity);
-		if (result == null) {
-			logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 실패");
-			throw new BoardException("관심 등록에 실패했습니다.");
+		FavoriteEntity result;
+		if (!status.equals(1)) {
+			FavoriteEntity favoriteEntity = FavoriteEntity.builder().userId(userId).postNum(postNum).status(1).build();
+			result = boardDao.save(favoriteEntity);
+			if (result == null) {
+				logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 실패");
+				throw new BoardException("관심 등록에 실패했습니다.");
+			}
+		} else {
+			FavoriteEntity favoriteEntity = boardDao.findByUserIdAndPostNum(userId, postNum);
+			if (favoriteEntity == null) {
+				logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 조회 실패");
+				throw new BoardException("관심 등록 취소에 실패했습니다.");
+			}
+			// update
+			favoriteEntity.setStatus(0);
+			result = boardDao.save(favoriteEntity);
+			if (result == null) {
+				logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 취소 실패");
+				throw new BoardException("관심 등록 취소에 실패했습니다.");
+			}
+			logger.info("BoardServiceImpl.addFavorite() : 데이터 삭제 성공");
 		}
 
-		logger.info("BoardServiceImpl.addFavorite() : 관심 등록 성공");
+		logger.info("BoardServiceImpl.addFavorite() : 관심 등록/취소 성공");
+		return FavoriteDto.toFavoriteDto(result);
+	}
+
+	@Override
+	public FavoriteDto getFavorite(String userId, Integer postNum) {
+		logger.info("BoardServiceImpl.getFavorite() is called");
+		FavoriteEntity result = boardDao.findByUserIdAndPostNum(userId, postNum);
+		if (result == null) {
+			logger.warn("BoardServiceImpl.getFavorite() : 데이터 조회 실패");
+			throw new BoardException("관심 등록 조회에 실패했습니다.");
+		}
+		logger.info("BoardServiceImpl.getFavorite() : 데이터 조회 성공");
 		return FavoriteDto.toFavoriteDto(result);
 	}
 }
