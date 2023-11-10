@@ -77,7 +77,9 @@ public class BoardServiceTest {
 
 	// Favorite
 	private FavoriteDto favoriteDto;
+	private List<FavoriteDto> favoriteDtoList;
 	private FavoriteEntity favoriteEntity;
+	private List<FavoriteEntity> favoriteEntities;
 
 
 	@BeforeEach
@@ -114,8 +116,14 @@ public class BoardServiceTest {
 			.postNum(postNum)
 			.status(1)
 			.build();
+		favoriteDtoList = new ArrayList<>();
+		favoriteDtoList.add(favoriteDto);
+		favoriteDtoList.add(favoriteDto);
 
 		favoriteEntity = FavoriteDto.toFavoriteEntity(favoriteDto);
+		favoriteEntities = new ArrayList<>();
+		favoriteEntities.add(favoriteEntity);
+		favoriteEntities.add(favoriteEntity);
 	}
 
 	@Test
@@ -386,5 +394,30 @@ public class BoardServiceTest {
 		Assertions.assertEquals(boardService.getFavorite(userId, postNum).toString(), favoriteDto.toString());
 
 		verify(boardDao).findByUserIdAndPostNum(any(String.class), any(Integer.class));
+	}
+
+	@Test
+	@DisplayName("게시글_관심_목록_조회_성공")
+	void getFavoriteListSuccess() {
+		given(boardDao.findByUserId(userId)).willReturn(favoriteEntities);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.getFavoriteList(userId).toString(), favoriteDtoList.toString());
+
+		verify(boardDao).findByUserId(userId);
+	}
+
+	@Test
+	@DisplayName("게시글_관심_목록_조회_실패")
+	void getFavoriteListFailure() {
+		given(boardDao.findByUserId(userId)).willReturn(null);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.getFavoriteList(userId);
+		});
+		Assertions.assertEquals(exception.getMessage(), "관심 목록 조회에 실패했습니다.");
+
+		verify(boardDao).findByUserId(userId);
 	}
 }
