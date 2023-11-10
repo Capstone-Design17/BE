@@ -94,6 +94,7 @@ public class BoardControllerTest {
 
 	// Favorite
 	private FavoriteDto favoriteDto;
+	private List<FavoriteDto> favoriteDtoList;
 
 	@Autowired
 	private WebApplicationContext ctx;
@@ -148,6 +149,9 @@ public class BoardControllerTest {
 
 		// Favorite
 		favoriteDto = FavoriteDto.builder().userId(userId).postNum(postNum).status(1).build();
+		favoriteDtoList = new ArrayList<>();
+		favoriteDtoList.add(favoriteDto);
+		favoriteDtoList.add(favoriteDto);
 	}
 
 	@Test
@@ -478,5 +482,31 @@ public class BoardControllerTest {
 			.andDo(print());
 
 		verify(boardService).getFavorite(userId, postNum);
+	}
+
+	@Test
+	@DisplayName("게시글_관심_목록_조회_성공")
+	void getFavoriteListSuccess() throws Exception {
+		given(boardService.getFavoriteList(userId)).willReturn(favoriteDtoList);
+
+		mockMvc.perform(get("/api/board/favorite/list").param("userId", userId))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("관심 목록 조회 성공")))
+			.andDo(print());
+
+		verify(boardService).getFavoriteList(userId);
+	}
+
+	@Test
+	@DisplayName("게시글_관심_목록_조회_실패")
+	void getFavoriteListFailure() throws Exception {
+		given(boardService.getFavoriteList(userId)).willThrow(new BoardException("관심 목록 조회에 실패했습니다."));
+
+		mockMvc.perform(get("/api/board/favorite/list").param("userId", userId))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("관심 목록 조회에 실패했습니다.")))
+			.andDo(print());
+
+		verify(boardService).getFavoriteList(userId);
 	}
 }
