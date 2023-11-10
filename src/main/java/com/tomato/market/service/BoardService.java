@@ -29,4 +29,6 @@ public interface BoardService {
 	FavoriteDto addFavorite(String userId, Integer postNum, Integer status);
 
 	FavoriteDto getFavorite(String userId, Integer postNum);
+
+	List<FavoriteDto> getFavoriteList(String userId);
 }

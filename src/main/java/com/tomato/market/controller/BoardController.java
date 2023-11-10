@@ -207,4 +207,18 @@ public class BoardController {
 			.data(favoriteDto)
 			.build();
 	}
+
+	@GetMapping("/board/favorite/list")
+	public ResponseDto<List<FavoriteDto>> getFavoriteList(String userId) {
+		logger.info("BoardController.getFavoriteList() is called");
+
+		List<FavoriteDto> favoriteDtoList = boardService.getFavoriteList(userId);
+		logger.info("BoardController.getFavoriteList() : 관심 목록 조회 성공");
+
+		return ResponseDto.<List<FavoriteDto>>builder()
+			.status(HttpStatus.OK)
+			.message("관심 목록 조회 성공")
+			.data(favoriteDtoList)
+			.build();
+	}
 }

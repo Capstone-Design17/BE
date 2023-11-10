@@ -27,4 +27,6 @@ public interface BoardDao {
 	FavoriteEntity save(FavoriteEntity favoriteEntity);
 
 	FavoriteEntity findByUserIdAndPostNum(String userId, Integer postNum);
+
+	List<FavoriteEntity> findByUserId(String userId);
 }
