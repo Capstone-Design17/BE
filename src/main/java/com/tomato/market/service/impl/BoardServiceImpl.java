@@ -249,7 +249,10 @@ public class BoardServiceImpl implements BoardService {
 		logger.info("BoardServiceImpl.getFavoriteList() : 관심 목록 조회 성공");
 		List<FavoriteDto> favoriteDtoList = new ArrayList<>();
 		for (FavoriteEntity favoriteEntity : favoriteEntities) {
-			favoriteDtoList.add(FavoriteDto.toFavoriteDto(favoriteEntity));
+			if (favoriteEntity.getStatus() == 1) {
+				// JPA로 바꿔도 가능
+				favoriteDtoList.add(FavoriteDto.toFavoriteDto(favoriteEntity));
+			}
 		}
 		return favoriteDtoList;
 	}

@@ -488,13 +488,19 @@ public class BoardControllerTest {
 	@DisplayName("게시글_관심_목록_조회_성공")
 	void getFavoriteListSuccess() throws Exception {
 		given(boardService.getFavoriteList(userId)).willReturn(favoriteDtoList);
+		given(boardService.getPost(postNum)).willReturn(postDto);
+		given(boardService.getPostImage(postNum)).willReturn(imageDto);
 
 		mockMvc.perform(get("/api/board/favorite/list").param("userId", userId))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message", is("관심 목록 조회 성공")))
+			.andExpect(jsonPath("$.data.postList").exists())
+			.andExpect(jsonPath("$.data.imageList").exists())
 			.andDo(print());
 
 		verify(boardService).getFavoriteList(userId);
+		verify(boardService, times(2)).getPost(postNum);
+		verify(boardService, times(2)).getPostImage(postNum);
 	}
 
 	@Test
