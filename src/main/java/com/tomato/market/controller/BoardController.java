@@ -16,17 +16,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PageDto;
 import com.tomato.market.data.dto.PostDto;
 import com.tomato.market.data.dto.PostListResponseDto;
 import com.tomato.market.data.dto.PostResponseDto;
+import com.tomato.market.data.dto.ResponseDto;
 import com.tomato.market.service.BoardService;
 
 import jakarta.validation.Valid;
@@ -155,6 +158,53 @@ public class BoardController {
 			.message("게시글 불러오기 성공")
 			.postDto(postDto)
 			.imageList(imageList)
+			.build();
+	}
+
+	// 관심등록
+	/* flow
+		PostDetail에서 버튼을 클릭
+		관심등록(좋아요 +1), 재클릭시 취소(삭제) -> 삭제말고 status로 하는게?
+		각 사용자당 각각 처리되어야 함
+		UserEntity에 ManyToOne : 다 대 일 연관관계 매핑?
+		별도 Table로 분리?
+			UserId, PostNum
+	 */
+
+
+	// 관심 등록/취소
+	@PostMapping("/board/favorite")
+	public ResponseDto<FavoriteDto> addFavorite(@RequestBody FavoriteDto favoriteDto) {
+		logger.info("BoardController.addFavorite() is called");
+
+		// status가 "on"이면 현재 등록된 상태
+		FavoriteDto result = boardService.addFavorite(favoriteDto.getUserId(), favoriteDto.getPostNum(),
+			favoriteDto.getStatus());
+		String message = "";
+		if (result.getStatus() == 1) {
+			message = "관심 등록 성공";
+		} else {
+			message = "관심 등록 취소 성공";
+		}
+		logger.info(result.toString());
+
+		// 좋아요 전체 개수를 리턴? // boardEntity 자체를 수정?
+		return ResponseDto.<FavoriteDto>builder().status(HttpStatus.OK).message(message).data(result)
+			.build();
+	}
+
+	// 관심 등록 확인
+	@GetMapping("/board/favorite")
+	public ResponseDto<FavoriteDto> getFavorite(String userId, Integer postNum) {
+		logger.info("BoardController.getFavorite() is called");
+
+		FavoriteDto favoriteDto = boardService.getFavorite(userId, postNum);
+		logger.info("BoardController.getFavorite() : 관심 등록 조회 성공");
+
+		return ResponseDto.<FavoriteDto>builder()
+			.status(HttpStatus.OK)
+			.message("관심 등록 확인 성공")
+			.data(favoriteDto)
 			.build();
 	}
 }

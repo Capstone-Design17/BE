@@ -16,8 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tomato.market.dao.BoardDao;
+import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
+import com.tomato.market.data.entity.FavoriteEntity;
 import com.tomato.market.data.entity.ImageEntity;
 import com.tomato.market.data.entity.PostEntity;
 import com.tomato.market.handler.exception.BoardException;
@@ -183,5 +185,56 @@ public class BoardServiceImpl implements BoardService {
 			imageList.add(ImageDto.toImageDto(imageEntity));
 		}
 		return imageList;
+	}
+
+	@Override
+	public FavoriteDto addFavorite(String userId, Integer postNum, Integer status) {
+		logger.info("BoardServiceImpl.addFavorite() is called");
+		logger.info("BoardServiceImpl.addFavorite() : 관심 등록 조회");
+		FavoriteEntity favoriteEntity = boardDao.findByUserIdAndPostNum(userId, postNum);
+		FavoriteEntity result;
+		if (favoriteEntity == null) {
+			logger.info("BoardServiceImpl.addFavorite() : 등록된 관심 등록 없음");
+			FavoriteEntity entity = FavoriteEntity.builder().userId(userId).postNum(postNum).status(1).build();
+			result = boardDao.save(entity);
+			if (result == null) {
+				logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 실패");
+				throw new BoardException("관심 등록에 실패했습니다.");
+
+			}
+			logger.info("BoardServiceImpl.addFavorite() : 관심 등록 성공");
+		} else {
+			if (status == 1) {
+				favoriteEntity.setStatus(0);
+				result = boardDao.save(favoriteEntity);
+				if (result == null) {
+					logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 취소 실패");
+					throw new BoardException("관심 등록 취소에 실패했습니다.");
+				}
+				logger.info("BoardServiceImpl.addFavorite() : 관심 등록 취소 성공");
+			} else {
+				favoriteEntity.setStatus(1);
+				result = boardDao.save(favoriteEntity);
+				if (result == null) {
+					logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 실패");
+					throw new BoardException("관심 등록에 실패했습니다.");
+				}
+				logger.info("BoardServiceImpl.addFavorite() : 관심 등록 성공");
+			}
+		}
+
+		return FavoriteDto.toFavoriteDto(result);
+	}
+
+	@Override
+	public FavoriteDto getFavorite(String userId, Integer postNum) {
+		logger.info("BoardServiceImpl.getFavorite() is called");
+		FavoriteEntity result = boardDao.findByUserIdAndPostNum(userId, postNum);
+		if (result == null) {
+			logger.warn("BoardServiceImpl.getFavorite() : 데이터 조회 실패");
+			throw new BoardException("관심 등록 조회에 실패했습니다.");
+		}
+		logger.info("BoardServiceImpl.getFavorite() : 데이터 조회 성공");
+		return FavoriteDto.toFavoriteDto(result);
 	}
 }

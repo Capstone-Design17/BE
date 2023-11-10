@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.tomato.market.data.entity.FavoriteEntity;
 import com.tomato.market.data.entity.ImageEntity;
 import com.tomato.market.data.entity.PostEntity;
 
@@ -22,4 +23,8 @@ public interface BoardDao {
 	PostEntity findPostByPostNum(Integer postNum);
 
 	List<ImageEntity> findImageListByPostNum(Integer postNum);
+
+	FavoriteEntity save(FavoriteEntity favoriteEntity);
+
+	FavoriteEntity findByUserIdAndPostNum(String userId, Integer postNum);
 }

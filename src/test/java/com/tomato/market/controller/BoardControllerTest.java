@@ -2,6 +2,7 @@ package com.tomato.market.controller;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,11 +32,14 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
 import com.tomato.market.handler.exception.BoardException;
@@ -87,6 +92,9 @@ public class BoardControllerTest {
 	// Search
 	private String keyword = "keyword";
 
+	// Favorite
+	private FavoriteDto favoriteDto;
+
 	@Autowired
 	private WebApplicationContext ctx;
 
@@ -138,6 +146,8 @@ public class BoardControllerTest {
 		// Page
 		postPageList = new PageImpl<>(postList, pageable, 2);
 
+		// Favorite
+		favoriteDto = FavoriteDto.builder().userId(userId).postNum(postNum).status(1).build();
 	}
 
 	@Test
@@ -275,7 +285,6 @@ public class BoardControllerTest {
 		given(boardService.getPostList(any(Pageable.class))).willReturn(postPageList);
 		given(boardService.getPostImage(postNum)).willReturn(imageDto);
 
-
 		mockMvc.perform(get("/api/board/getPostList"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message", is("게시글 리스트 불러오기 성공")))
@@ -376,5 +385,98 @@ public class BoardControllerTest {
 
 		verify(boardService).getPost(postNum);
 		verify(boardService).getPostImageList(postNum);
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_성공")
+	void addFavoriteSuccess() throws Exception {
+		favoriteDto.setStatus(0);
+		content = new ObjectMapper().writeValueAsString(favoriteDto);
+		favoriteDto.setStatus(1);
+		given(boardService.addFavorite(any(String.class), any(Integer.class), any(Integer.class))).willReturn(
+			favoriteDto);
+
+
+		mockMvc.perform(post("/api/board/favorite")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(content)
+			)
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("관심 등록 성공")))
+			.andExpect(jsonPath("$.data.userId", is(userId)))
+			.andDo(print());
+
+		verify(boardService).addFavorite(any(String.class), any(Integer.class), any(Integer.class));
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_실패")
+	void addFavoriteFailure() throws Exception {
+		given(boardService.addFavorite(any(String.class), any(Integer.class), any(Integer.class))).willThrow(
+			new BoardException("관심 등록에 실패했습니다."));
+
+		content = new ObjectMapper().writeValueAsString(favoriteDto);
+
+		mockMvc.perform(post("/api/board/favorite")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(content)
+			)
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("관심 등록에 실패했습니다.")))
+			.andDo(print());
+
+		verify(boardService).addFavorite(any(String.class), any(Integer.class), any(Integer.class));
+
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_취소_성공")
+	void cancelFavoriteSuccess() throws Exception {
+		content = new ObjectMapper().writeValueAsString(favoriteDto);
+		favoriteDto.setStatus(0);
+		given(boardService.addFavorite(any(String.class), any(Integer.class), eq(1))).willReturn(favoriteDto);
+
+		mockMvc.perform(post("/api/board/favorite")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(content)
+			)
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("관심 등록 취소 성공")))
+			.andDo(print());
+
+		verify(boardService).addFavorite(any(String.class), any(Integer.class), eq(1));
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_확인_성공")
+	void getFavoriteSuccess() throws Exception {
+		given(boardService.getFavorite(userId, postNum)).willReturn(favoriteDto);
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("userId", userId);
+		map.add("postNum", postNum.toString());
+		mockMvc.perform(get("/api/board/favorite").params(map))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("관심 등록 확인 성공")))
+			.andDo(print());
+
+		given(boardService.getFavorite(userId, postNum)).willReturn(favoriteDto);
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_확인_실패")
+	void getFavoriteFailure() throws Exception {
+		given(boardService.getFavorite(userId, postNum))
+			.willThrow(new BoardException("관심 등록 조회에 실패했습니다."));
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("userId", userId);
+		map.add("postNum", postNum.toString());
+		mockMvc.perform(get("/api/board/favorite").params(map))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("관심 등록 조회에 실패했습니다.")))
+			.andDo(print());
+
+		verify(boardService).getFavorite(userId, postNum);
 	}
 }
