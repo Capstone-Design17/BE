@@ -515,4 +515,5 @@ public class BoardControllerTest {
 
 		verify(boardService).getFavoriteList(userId);
 	}
+
 }

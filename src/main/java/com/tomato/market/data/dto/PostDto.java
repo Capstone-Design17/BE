@@ -44,6 +44,7 @@ public class PostDto {
 	public static PostEntity toPostEntity(PostDto postDto) {
 
 		return PostEntity.builder()
+			.postNum(postDto.getPostNum())
 			.userId(postDto.getUserId())
 			.location(postDto.getLocation())
 			.title(postDto.getTitle())
