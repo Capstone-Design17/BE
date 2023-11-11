@@ -420,4 +420,31 @@ public class BoardServiceTest {
 
 		verify(boardDao).findByUserId(userId);
 	}
+
+	@Test
+	@DisplayName("게시글_수정_성공")
+	void updatePostSuccess() {
+		postDto.setContent("수정된 내용");
+		postEntity.setContent("수정된 내용");
+		given(boardDao.save(any(PostEntity.class))).willReturn(postEntity);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.updatePost(postDto).toString(), postDto.toString());
+
+		verify(boardDao).save(any(PostEntity.class));
+	}
+
+	@Test
+	@DisplayName("게시글_수정_실패")
+	void updatePostFailure() {
+		given(boardDao.save(any(PostEntity.class))).willThrow(new BoardException("게시글 수정에 실패했습니다."));
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.updatePost(postDto);
+		});
+		Assertions.assertEquals(exception.getMessage(), "게시글 수정에 실패했습니다.");
+
+		verify(boardDao).save(any(PostEntity.class));
+	}
 }
