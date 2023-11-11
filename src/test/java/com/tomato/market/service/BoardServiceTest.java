@@ -84,7 +84,8 @@ public class BoardServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		postDto = PostDto.builder().userId(userId).location(location).title(title).category(category).content(content)
+		postDto = PostDto.builder().postNum(postNum).userId(userId).location(location).title(title).category(category)
+			.content(content)
 			.price(price).detailLocation(detailLocation).status(status).boughtUserId(boughtUserId).build();
 
 		postEntity = PostDto.toPostEntity(postDto);
@@ -445,6 +446,35 @@ public class BoardServiceTest {
 		});
 		Assertions.assertEquals(exception.getMessage(), "게시글 수정에 실패했습니다.");
 
+		verify(boardDao).save(any(PostEntity.class));
+	}
+
+	@Test
+	@DisplayName("게시글_상태_수정_성공")
+	void updateStatusSuccess() {
+		given(boardDao.findPostByPostNum(any(Integer.class))).willReturn(postEntity);
+		given(boardDao.save(any(PostEntity.class))).willReturn(postEntity);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.updateStatus(postDto).toString(), postDto.toString());
+
+		verify(boardDao).findPostByPostNum(any(Integer.class));
+		verify(boardDao).save(any(PostEntity.class));
+	}
+
+	@Test
+	@DisplayName("게시글_상태_수정_실패")
+	void updateStatusFailure() {
+		given(boardDao.findPostByPostNum(any(Integer.class))).willReturn(postEntity);
+		given(boardDao.save(any(PostEntity.class))).willThrow(new BoardException("게시글 상태 수정에 실패했습니다."));
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.updateStatus(postDto);
+		});
+		Assertions.assertEquals(exception.getMessage(), "게시글 상태 수정에 실패했습니다.");
+
+		verify(boardDao).findPostByPostNum(any(Integer.class));
 		verify(boardDao).save(any(PostEntity.class));
 	}
 }
