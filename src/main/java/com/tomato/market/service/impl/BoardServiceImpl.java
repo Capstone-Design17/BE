@@ -270,4 +270,26 @@ public class BoardServiceImpl implements BoardService {
 		logger.info("BoardServiceImpl.updatePost() : 게시글 수정 성공");
 		return PostDto.toPostDto(postEntity);
 	}
+
+	@Override
+	public PostDto updateStatus(PostDto postDto) {
+		logger.info("BoardServiceImpl.updateStatus() is called");
+
+		PostEntity postEntity = boardDao.findPostByPostNum(postDto.getPostNum());
+		if (postEntity == null) {
+			logger.info("BoardServiceImpl.updateStatus() : 게시글 조회 실패");
+			throw new BoardException("게시글 조회 실패");
+		}
+
+		logger.info("BoardServiceImpl.updateStatus() : 게시글 조회 성공");
+		postEntity.setStatus(postDto.getStatus());
+		PostEntity result = boardDao.save(postEntity);
+		if (result == null) {
+			logger.warn("BoardServiceImpl.updateStatus() : 게시글 수정 실패");
+			throw new BoardException("게시글 수정 실패");
+		}
+
+		logger.info("BoardServiceImpl.updateStatus() : 게시글 수정 성공");
+		return PostDto.toPostDto(result);
+	}
 }

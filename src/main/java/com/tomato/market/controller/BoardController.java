@@ -15,6 +15,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -263,8 +264,17 @@ public class BoardController {
 
 	// 판매 상태 변경
 	// Patch?
-//	@PatchMapping("board/post")
-//	public ResponseDto<PostDto> completePost() {
-//		return ResponseDto.<PostDto>builder().build();
-//	}
+	@PatchMapping("board/post")
+	public ResponseDto<PostDto> updateStatus(@RequestBody PostDto postDto) {
+		logger.info("BoardController.updateStatus() is called");
+
+		PostDto result = boardService.updateStatus(postDto);
+
+		logger.info("BoardController.updateStatus() : 게시글 상태 수정 성공");
+		return ResponseDto.<PostDto>builder()
+			.status(HttpStatus.OK)
+			.message("게시글 상태 수정 성공")
+			.data(result)
+			.build();
+	}
 }

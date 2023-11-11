@@ -53,6 +53,7 @@ public class PostDto {
 			.price(postDto.getPrice())
 			.detailLocation(postDto.getDetailLocation())
 			.status(postDto.getStatus())
+			.createdAt(postDto.getCreateAt())
 			.boughtUserId(postDto.getBoughtUserId())
 			.build();
 	}

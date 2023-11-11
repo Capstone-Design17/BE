@@ -33,4 +33,6 @@ public interface BoardService {
 	List<FavoriteDto> getFavoriteList(String userId);
 
 	PostDto updatePost(PostDto postDto);
+
+	PostDto updateStatus(PostDto postDto);
 }
