@@ -207,4 +207,37 @@ public class BoardController {
 			.data(favoriteDto)
 			.build();
 	}
+
+	@GetMapping("/board/favorite/list")
+	public ResponseDto<PostListResponseDto> getFavoriteList(String userId) {
+		logger.info("BoardController.getFavoriteList() is called");
+
+		// 관심 목록 번호 조회
+		List<FavoriteDto> favoriteDtoList = boardService.getFavoriteList(userId);
+		logger.info("BoardController.getFavoriteList() : 관심 목록 조회 성공");
+
+		// 관심 목록에 대한 PostList 조회
+		// fovoriteList에 대한 가공 -> 조회
+		List<PostDto> postDtoList = new ArrayList<>();
+		for (FavoriteDto favoriteDto : favoriteDtoList) {
+			postDtoList.add(boardService.getPost(favoriteDto.getPostNum()));
+		}
+
+		// PostList에 대한 ImageList 조회
+		List<ImageDto> imageDtoList = new ArrayList<>();
+		for (PostDto postDto : postDtoList) {
+			imageDtoList.add(boardService.getPostImage(postDto.getPostNum()));
+		}
+
+		PostListResponseDto responseDto = PostListResponseDto.builder()
+			.postList(postDtoList)
+			.imageList(imageDtoList)
+			.build();
+
+		return ResponseDto.<PostListResponseDto>builder()
+			.status(HttpStatus.OK)
+			.message("관심 목록 조회 성공")
+			.data(responseDto) // 어떤 형식으로 넘기지?
+			.build();
+	}
 }

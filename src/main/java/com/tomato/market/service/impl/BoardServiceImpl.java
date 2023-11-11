@@ -237,4 +237,23 @@ public class BoardServiceImpl implements BoardService {
 		logger.info("BoardServiceImpl.getFavorite() : 데이터 조회 성공");
 		return FavoriteDto.toFavoriteDto(result);
 	}
+
+	@Override
+	public List<FavoriteDto> getFavoriteList(String userId) {
+		logger.info("BoardServiceImpl.getFavoriteList() is called");
+		List<FavoriteEntity> favoriteEntities = boardDao.findByUserId(userId);
+		if (favoriteEntities == null) {
+			logger.warn("BoardServiceImpl.getFavoriteList() : 관심 목록 조회 실패");
+			throw new BoardException("관심 목록 조회에 실패했습니다.");
+		}
+		logger.info("BoardServiceImpl.getFavoriteList() : 관심 목록 조회 성공");
+		List<FavoriteDto> favoriteDtoList = new ArrayList<>();
+		for (FavoriteEntity favoriteEntity : favoriteEntities) {
+			if (favoriteEntity.getStatus() == 1) {
+				// JPA로 바꿔도 가능
+				favoriteDtoList.add(FavoriteDto.toFavoriteDto(favoriteEntity));
+			}
+		}
+		return favoriteDtoList;
+	}
 }
