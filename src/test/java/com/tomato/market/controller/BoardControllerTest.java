@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -514,6 +515,42 @@ public class BoardControllerTest {
 			.andDo(print());
 
 		verify(boardService).getFavoriteList(userId);
+	}
+
+	@Test
+	@DisplayName("게시글_수정_성공")
+	void updatePostSuccess() throws Exception {
+		postDto.setContent("수정된 내용");
+		given(boardService.updatePost(any(PostDto.class))).willReturn(postDto);
+
+		String content = new ObjectMapper().writeValueAsString(postDto);
+		mockMvc.perform(put("/api/board/post")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(content)
+			)
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("게시글 수정 성공")))
+			.andExpect(jsonPath("$.data.content", is("수정된 내용")))
+			.andDo(print());
+
+		verify(boardService).updatePost(any(PostDto.class));
+	}
+
+	@Test
+	@DisplayName("게시글_수정_실패")
+	void updatePostFailure() throws Exception {
+		given(boardService.updatePost(any(PostDto.class))).willThrow(new BoardException("게시글 수정에 실패했습니다."));
+
+		String content = new ObjectMapper().writeValueAsString(postDto);
+		mockMvc.perform(put("/api/board/post")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(content)
+			)
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("게시글 수정에 실패했습니다.")))
+			.andDo(print());
+
+		verify(boardService).updatePost(any(PostDto.class));
 	}
 
 }
