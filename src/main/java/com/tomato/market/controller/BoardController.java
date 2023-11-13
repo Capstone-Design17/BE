@@ -280,16 +280,27 @@ public class BoardController {
 
 	// 판매 목록
 	@GetMapping("/board/sellList")
-	public ResponseDto<List<PostDto>> getSellList(String userId) {
+	public ResponseDto<PostListResponseDto> getSellList(String userId) {
 		logger.info("BoardController.getSellList() is called");
 
-		List<PostDto> result = boardService.getSellList(userId);
-
+		List<PostDto> postDtoList = boardService.getSellList(userId);
 		logger.info("BoardController.getSellList() : 판매 목록 조회 성공");
-		return ResponseDto.<List<PostDto>>builder()
+
+		// PostList에 대한 ImageList 조회
+		List<ImageDto> imageDtoList = new ArrayList<>();
+		for (PostDto postDto : postDtoList) {
+			imageDtoList.add(boardService.getPostImage(postDto.getPostNum()));
+		}
+
+		PostListResponseDto responseDto = PostListResponseDto.builder()
+			.postList(postDtoList)
+			.imageList(imageDtoList)
+			.build();
+
+		return ResponseDto.<PostListResponseDto>builder()
 			.status(HttpStatus.OK)
 			.message("판매 목록 조회 성공")
-			.data(result)
+			.data(responseDto)
 			.build();
 	}
 
