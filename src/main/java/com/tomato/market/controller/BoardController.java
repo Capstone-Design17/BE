@@ -277,4 +277,20 @@ public class BoardController {
 			.data(result)
 			.build();
 	}
+
+	// 판매 목록
+	@GetMapping("/board/sellList")
+	public ResponseDto<List<PostDto>> getSellList(String userId) {
+		logger.info("BoardController.getSellList() is called");
+
+		List<PostDto> result = boardService.getSellList(userId);
+
+		logger.info("BoardController.getSellList() : 판매 목록 조회 성공");
+		return ResponseDto.<List<PostDto>>builder()
+			.status(HttpStatus.OK)
+			.message("판매 목록 조회 성공")
+			.data(result)
+			.build();
+	}
+
 }
