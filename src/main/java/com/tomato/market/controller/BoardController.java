@@ -15,7 +15,9 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -238,6 +240,41 @@ public class BoardController {
 			.status(HttpStatus.OK)
 			.message("관심 목록 조회 성공")
 			.data(responseDto) // 어떤 형식으로 넘기지?
+			.build();
+	}
+
+
+	// 게시글 내용 변경
+	@PutMapping("/board/post") // null 값 그대로 전달
+	public ResponseDto<PostDto> updatePost(@RequestBody PostDto postDto) {
+		logger.info("BoardController.updatePost() is called");
+
+		// 게시글 수정
+		PostDto result = boardService.updatePost(postDto);
+
+		// 이미지 수정은 어떻게?
+
+		logger.info("BoardController.updatePost() : 게시글 수정 성공");
+		return ResponseDto.<PostDto>builder()
+			.status(HttpStatus.OK)
+			.message("게시글 수정 성공")
+			.data(postDto)
+			.build();
+	}
+
+	// 판매 상태 변경
+	// Patch?
+	@PatchMapping("board/post")
+	public ResponseDto<PostDto> updateStatus(@RequestBody PostDto postDto) {
+		logger.info("BoardController.updateStatus() is called");
+
+		PostDto result = boardService.updateStatus(postDto);
+
+		logger.info("BoardController.updateStatus() : 게시글 상태 수정 성공");
+		return ResponseDto.<PostDto>builder()
+			.status(HttpStatus.OK)
+			.message("게시글 상태 수정 성공")
+			.data(result)
 			.build();
 	}
 }
