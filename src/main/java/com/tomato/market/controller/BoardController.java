@@ -89,10 +89,24 @@ public class BoardController {
 	@GetMapping(value = "/board/getPostList")
 	public PostListResponseDto getPostList(
 		@PageableDefault(page = 0, size = 10, sort = "postNum", direction = Sort.Direction.DESC) Pageable pageable,
-		@RequestParam(required = false) String keyword) throws MalformedURLException {
+		@RequestParam(required = false) String keyword) throws MalformedURLException { // keyword 대신 DTO로 받음
+		// @RequestParam(required = false) SearchDto searchDto
+
 		logger.info("BoardController.getPostList() is called");
 //		logger.info("BoardController.getPostList() page : " + pageable.getPageNumber());
 
+/*	Service 코드로 이동
+
+		if (searchDto.getType().equals("N")) { // 일반 검색
+			// 여기에 각각 다른 DAO Method 사용할 것
+			// ByTitle
+		} else if (searchDto.getType().equals("C")) { // Category
+			// ByCategory
+			boardDao.findByCategory(searchDto.getKeyword(), pageable);
+		}
+
+		그 외 SideEffect 수정, Test 코드
+*/
 		// 게시글 리스트를 받음
 		Page<PostDto> postList = null;
 		if (keyword == null) {
@@ -101,6 +115,7 @@ public class BoardController {
 		} else {
 			logger.info("BoardController.getPostList() : 검색 키워드 있음");
 			postList = boardService.getPostSearchList(keyword, pageable);
+//			postList = boardService.getPostSearchList(searchDto, pageable); // 이걸로 변경할 것
 		}
 
 
