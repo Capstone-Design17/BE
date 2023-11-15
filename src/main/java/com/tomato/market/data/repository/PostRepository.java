@@ -13,5 +13,8 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
 
 	Page<PostEntity> findByTitleContaining(String keyword, Pageable pageable);
 
+	Page<PostEntity> findByCategoryContaining(String keyword, Pageable pageable);
+
 	Optional<PostEntity> findByPostNum(Integer postNum);
+
 }
