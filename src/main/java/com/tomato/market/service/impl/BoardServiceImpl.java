@@ -301,4 +301,23 @@ public class BoardServiceImpl implements BoardService {
 		logger.info("BoardServiceImpl.updateStatus() : 게시글 수정 성공");
 		return PostDto.toPostDto(result);
 	}
+
+	@Override
+	public List<PostDto> getSellList(String userId) {
+		logger.info("BoardServiceImpl.getSellList() is called");
+
+		List<PostEntity> postEntities = boardDao.findPostByUserId(userId);
+		if (postEntities == null) {
+			logger.warn("BoardServiceImpl.getSellList() : 판매 목록 조회 실패");
+			throw new BoardException("판매 목록 조회에 실패했습니다.");
+		}
+
+		logger.info("BoardServiceImpl.getSellList() : 판매 목록 조회 성공");
+		List<PostDto> postDtoList = new ArrayList<>();
+		for (PostEntity postEntity : postEntities) {
+			postDtoList.add(PostDto.toPostDto(postEntity));
+		}
+
+		return postDtoList;
+	}
 }

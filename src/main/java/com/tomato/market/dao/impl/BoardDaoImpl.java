@@ -188,4 +188,17 @@ public class BoardDaoImpl implements BoardDao {
 		logger.info("BoardDaoImpl.findByUserId() : 데이터 조회 성공");
 		return favoriteEntities;
 	}
+
+	@Override
+	public List<PostEntity> findPostByUserId(String userId) {
+		logger.info("BoardDaoImpl.findPostByUserId() is called");
+		List<PostEntity> postEntities = postRepository.findByUserId(userId);
+		if (postEntities == null) {
+			logger.warn("BoardDaoImpl.findPostByUserId : 데이터 조회 실패");
+			return null;
+		}
+
+		logger.info("BoardDaoImpl.findPostByUserId : 데이터 조회 성공");
+		return postEntities;
+	}
 }

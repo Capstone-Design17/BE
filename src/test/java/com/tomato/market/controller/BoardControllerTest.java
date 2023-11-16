@@ -599,4 +599,38 @@ public class BoardControllerTest {
 
 		verify(boardService).updateStatus(any(PostDto.class));
 	}
+
+	@Test
+	@DisplayName("판매_목록_조회_성공")
+	void getSellListSuccess() throws Exception {
+		given(boardService.getSellList(any(String.class))).willReturn(postList);
+		given(boardService.getPostImage(any(Integer.class))).willReturn(imageDto);
+
+		mockMvc.perform(get("/api/board/sellList")
+				.param("userId", userId)
+			)
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("판매 목록 조회 성공")))
+			.andExpect(jsonPath("$.data.postList").exists())
+			.andExpect(jsonPath("$.data.imageList").exists())
+			.andDo(print());
+
+		verify(boardService).getSellList(any(String.class));
+		verify(boardService, times(2)).getPostImage(any(Integer.class));
+	}
+
+	@Test
+	@DisplayName("판매_목록_조회_실패")
+	void getSellListFailure() throws Exception {
+		given(boardService.getSellList(any(String.class))).willThrow(new BoardException("판매 목록 조회에 실패했습니다."));
+
+		mockMvc.perform(get("/api/board/sellList")
+				.param("userId", userId)
+			)
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("판매 목록 조회에 실패했습니다.")))
+			.andDo(print());
+
+		verify(boardService).getSellList(any(String.class));
+	}
 }

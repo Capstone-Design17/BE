@@ -36,4 +36,6 @@ public interface BoardService {
 	PostDto updatePost(PostDto postDto);
 
 	PostDto updateStatus(PostDto postDto);
+
+	List<PostDto> getSellList(String userId);
 }
