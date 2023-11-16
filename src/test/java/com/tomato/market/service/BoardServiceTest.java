@@ -477,4 +477,29 @@ public class BoardServiceTest {
 		verify(boardDao).findPostByPostNum(any(Integer.class));
 		verify(boardDao).save(any(PostEntity.class));
 	}
+
+	@Test
+	@DisplayName("판매_목록_조회_성공")
+	void getSellListSuccess() {
+		given(boardDao.findPostByUserId(any(String.class))).willReturn(postEntities);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.getSellList(userId).toString(), postDtoList.toString());
+
+		verify(boardDao).findPostByUserId(any(String.class));
+	}
+
+	@Test
+	@DisplayName("판매_목록_조회_실패")
+	void getSellListFailure() {
+		given(boardDao.findPostByUserId(any(String.class))).willReturn(null);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.getSellList(userId);
+		});
+		Assertions.assertEquals(exception.getMessage(), "판매 목록 조회에 실패했습니다.");
+
+		verify(boardDao).findPostByUserId(any(String.class));
+	}
 }
