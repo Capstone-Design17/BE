@@ -15,12 +15,12 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +32,7 @@ import com.tomato.market.data.dto.PostDto;
 import com.tomato.market.data.dto.PostListResponseDto;
 import com.tomato.market.data.dto.PostResponseDto;
 import com.tomato.market.data.dto.ResponseDto;
+import com.tomato.market.data.dto.SearchDto;
 import com.tomato.market.service.BoardService;
 
 import jakarta.validation.Valid;
@@ -89,18 +90,20 @@ public class BoardController {
 	@GetMapping(value = "/board/getPostList")
 	public PostListResponseDto getPostList(
 		@PageableDefault(page = 0, size = 10, sort = "postNum", direction = Sort.Direction.DESC) Pageable pageable,
-		@RequestParam(required = false) String keyword) throws MalformedURLException {
+		@ModelAttribute SearchDto searchDto) throws MalformedURLException { // keyword 대신 DTO로 받음
+
 		logger.info("BoardController.getPostList() is called");
 //		logger.info("BoardController.getPostList() page : " + pageable.getPageNumber());
+		logger.info("BoardController.getPostList() : Search DTO-" + searchDto.toString());
 
 		// 게시글 리스트를 받음
 		Page<PostDto> postList = null;
-		if (keyword == null) {
+		if (searchDto.getType() == null) {
 			logger.info("BoardController.getPostList() : 검색 키워드 없음");
 			postList = boardService.getPostList(pageable);
 		} else {
 			logger.info("BoardController.getPostList() : 검색 키워드 있음");
-			postList = boardService.getPostSearchList(keyword, pageable);
+			postList = boardService.getPostSearchList(searchDto, pageable); // 이걸로 변경할 것
 		}
 
 

@@ -31,6 +31,7 @@ import com.tomato.market.dao.impl.BoardDaoImpl;
 import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
+import com.tomato.market.data.dto.SearchDto;
 import com.tomato.market.data.entity.FavoriteEntity;
 import com.tomato.market.data.entity.ImageEntity;
 import com.tomato.market.data.entity.PostEntity;
@@ -70,6 +71,9 @@ public class BoardServiceTest {
 
 	private Pageable pageable = PageRequest.of(0, 10);
 	private Page<PostEntity> postEntityList;
+
+	private SearchDto searchDto;
+	private String type = "T";
 	private String keyword = "keyword";
 	private List<PostDto> postDtoList;
 
@@ -125,6 +129,8 @@ public class BoardServiceTest {
 		favoriteEntities = new ArrayList<>();
 		favoriteEntities.add(favoriteEntity);
 		favoriteEntities.add(favoriteEntity);
+
+		searchDto = SearchDto.builder().type(type).keyword(keyword).build();
 	}
 
 	@Test
@@ -267,7 +273,8 @@ public class BoardServiceTest {
 		given(boardDao.findPostSearchList(any(String.class), any(Pageable.class))).willReturn(postEntityList);
 
 		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
-		Assertions.assertEquals(boardService.getPostSearchList(keyword, pageable).toString(), postDtoPage.toString());
+		Assertions.assertEquals(boardService.getPostSearchList(searchDto, pageable).toString(),
+			postDtoPage.toString());
 
 		verify(boardDao).findPostSearchList(any(String.class), any(Pageable.class));
 	}
@@ -280,7 +287,7 @@ public class BoardServiceTest {
 
 		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
 		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
-			boardService.getPostSearchList(keyword, pageable);
+			boardService.getPostSearchList(searchDto, pageable);
 		});
 		Assertions.assertEquals(exception.getMessage(), "검색 결과 목록을 불러오지 못했습니다.");
 

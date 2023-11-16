@@ -96,6 +96,20 @@ public class BoardDaoImpl implements BoardDao {
 	}
 
 	@Override
+	public Page<PostEntity> findByCategory(String keyword, Pageable pageable) {
+		logger.info("BoardDaoImpl.findByCategory() is called");
+
+		Page<PostEntity> postEntities = postRepository.findByCategoryContaining(keyword, pageable);
+		if (postEntities != null) {
+			logger.info("BoardDaoImpl.findPostSearchList() : 검색 목록 조회 성공");
+			return postEntities;
+		} else {
+			logger.warn("BoardDaoImpl.findPostSearchList() : 검색 목록 조회 실패");
+			throw new BoardException("검색 결과 목록을 불러오지 못했습니다.");
+		}
+	}
+
+	@Override
 	public ImageEntity findImageByPostNum(Integer postNum) {
 		logger.info("BoardDaoImpl.findImageByPostNum() is called");
 //		Optional<ImageEntity> imageEntity = imageRepository.findImageByPostNum(postNum);

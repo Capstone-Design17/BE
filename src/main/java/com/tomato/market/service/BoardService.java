@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
+import com.tomato.market.data.dto.SearchDto;
 
 public interface BoardService {
 	PostDto writePost(PostDto postDto);
@@ -18,7 +19,7 @@ public interface BoardService {
 
 	Page<PostDto> getPostList(Pageable pageable);
 
-	Page<PostDto> getPostSearchList(String keyword, Pageable pageable);
+	Page<PostDto> getPostSearchList(SearchDto searchDto, Pageable pageable);
 
 	ImageDto getPostImage(Integer postNum);
 

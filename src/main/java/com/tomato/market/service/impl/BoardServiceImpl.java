@@ -19,6 +19,7 @@ import com.tomato.market.dao.BoardDao;
 import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
+import com.tomato.market.data.dto.SearchDto;
 import com.tomato.market.data.entity.FavoriteEntity;
 import com.tomato.market.data.entity.ImageEntity;
 import com.tomato.market.data.entity.PostEntity;
@@ -113,10 +114,18 @@ public class BoardServiceImpl implements BoardService {
 	}
 
 	@Override
-	public Page<PostDto> getPostSearchList(String keyword, Pageable pageable) {
+	public Page<PostDto> getPostSearchList(SearchDto searchDto, Pageable pageable) {
 		logger.info("BoardServiceImpl.getPostSearchList() is called");
 
-		Page<PostEntity> postEntities = boardDao.findPostSearchList(keyword, pageable);
+		Page<PostEntity> postEntities = null;
+		if (searchDto.getType().equals("T")) {
+			logger.info("BoardServiceImpl.getPostSearchList() : Title로 검색");
+			postEntities = boardDao.findPostSearchList(searchDto.getKeyword(), pageable);
+		} else if (searchDto.getType().equals("C")) {
+			logger.info("BoardServiceImpl.getPostSearchList() : Category로 검색");
+			postEntities = boardDao.findByCategory(searchDto.getKeyword(), pageable);
+		}
+
 		if (postEntities == null) {
 			logger.warn("BoardServiceImpl.getPostSearchList() : 검색 결과 목록 조회 실패");
 			throw new BoardException("검색 결과 목록을 불러오지 못했습니다.");

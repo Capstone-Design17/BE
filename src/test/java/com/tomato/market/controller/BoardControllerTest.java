@@ -44,6 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
+import com.tomato.market.data.dto.SearchDto;
 import com.tomato.market.handler.exception.BoardException;
 import com.tomato.market.service.impl.BoardServiceImpl;
 
@@ -92,6 +93,8 @@ public class BoardControllerTest {
 	private Page<PostDto> postPageList;
 
 	// Search
+	private SearchDto searchDto;
+	private String type = "T";
 	private String keyword = "keyword";
 
 	// Favorite
@@ -148,6 +151,9 @@ public class BoardControllerTest {
 
 		// Page
 		postPageList = new PageImpl<>(postList, pageable, 2);
+
+		// Search
+		searchDto = SearchDto.builder().type(type).keyword(keyword).build();
 
 		// Favorite
 		favoriteDto = FavoriteDto.builder().userId(userId).postNum(postNum).status(1).build();
@@ -318,10 +324,13 @@ public class BoardControllerTest {
 	@Test
 	@DisplayName("게시글_리스트_검색_성공")
 	void getPostSearchListSuccess() throws Exception {
-		given(boardService.getPostSearchList(any(String.class), any(Pageable.class))).willReturn(postPageList);
+		given(boardService.getPostSearchList(any(SearchDto.class), any(Pageable.class))).willReturn(postPageList);
 		given(boardService.getPostImage(postNum)).willReturn(imageDto);
 
-		mockMvc.perform(get("/api/board/getPostList").param("keyword", "keyword"))
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("type", type);
+		map.add("keyword", keyword);
+		mockMvc.perform(get("/api/board/getPostList").params(map))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message", is("게시글 리스트 불러오기 성공")))
 			.andExpect(jsonPath("$.postList").exists())
@@ -329,22 +338,25 @@ public class BoardControllerTest {
 			.andDo(print());
 
 
-		verify(boardService).getPostSearchList(any(String.class), any(Pageable.class));
+		verify(boardService).getPostSearchList(any(SearchDto.class), any(Pageable.class));
 		verify(boardService, times(2)).getPostImage(postNum);
 	}
 
 	@Test
 	@DisplayName("게시글_리스트_검색_실패")
 	void getPostSearchListFailure() throws Exception {
-		given(boardService.getPostSearchList(any(String.class), any(Pageable.class))).willThrow(
+		given(boardService.getPostSearchList(any(SearchDto.class), any(Pageable.class))).willThrow(
 			new BoardException("검색 결과 목록을 불러오지 못했습니다."));
 
-		mockMvc.perform(get("/api/board/getPostList").param("keyword", "keyword"))
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("type", type);
+		map.add("keyword", keyword);
+		mockMvc.perform(get("/api/board/getPostList").params(map))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message", is("검색 결과 목록을 불러오지 못했습니다.")))
 			.andDo(print());
 
-		verify(boardService).getPostSearchList(any(String.class), any(Pageable.class));
+		verify(boardService).getPostSearchList(any(SearchDto.class), any(Pageable.class));
 	}
 
 	@Test

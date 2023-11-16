@@ -18,6 +18,8 @@ public interface BoardDao {
 
 	Page<PostEntity> findPostSearchList(String keyword, Pageable pageable);
 
+	Page<PostEntity> findByCategory(String keyword, Pageable pageable);
+
 	ImageEntity findImageByPostNum(Integer postNum);
 
 	PostEntity findPostByPostNum(Integer postNum);
