@@ -142,7 +142,7 @@ public class UserController {
 		// ReponseDto를 사용하기로 함, 기존에 작성된 코드는 시간관계상 그대로 두겠음
 		return ResponseDto.<String>builder()
 			.status(HttpStatus.OK)
-			.message("닉네임 변경 완료")
+			.message("닉네임 변경 성공")
 			.data(userNickname)
 			.build();
 	}
@@ -167,11 +167,11 @@ public class UserController {
 		logger.info("UserController.updateLocation() is called");
 
 		String userLocation = userService.updateLocation(userId, location);
-		logger.info("UserController.updateLocation() : 위치 번경 완료");
+		logger.info("UserController.updateLocation() : 위치 번경 성공");
 
 		return ResponseDto.<String>builder()
 			.status(HttpStatus.OK)
-			.message("위치 변경 완료")
+			.message("위치 변경 성공")
 			.data(userLocation)
 			.build();
 
