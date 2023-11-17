@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tomato.market.dao.UserDao;
 import com.tomato.market.data.dto.UserLoginDto;
 import com.tomato.market.data.dto.UserSignUpDto;
+import com.tomato.market.data.entity.LocationEntity;
 import com.tomato.market.data.entity.UserEntity;
 import com.tomato.market.handler.exception.UserException;
 import com.tomato.market.service.UserService;
@@ -88,5 +89,80 @@ public class UserServiceImpl implements UserService {
 			logger.warn("UserServiceImpl.loginUser() : 등록된 사용자 정보를 찾지 못함");
 			throw new UserException("등록되지 않은 아이디입니다.");
 		}
+	}
+
+	@Override
+	public String updateNickname(String userId, String nickname) {
+		logger.info("UserServiceImp.updateNickname() is called");
+
+		UserEntity userEntity = userDao.get(userId);
+		if (userEntity == null) {
+			logger.warn("UserServiceImpl.updateNickname() : 아이디 조회 실패");
+			throw new UserException("등록된 아이디가 없습니다.");
+		}
+
+		logger.info("UserServiceImpl.updateNickname() : 아이디 조회 성공");
+		userEntity.setNickName(nickname);
+		UserEntity result = userDao.save(userEntity);
+		if (result == null) {
+			logger.warn("UserServiceImpl.updateNickname() : 닉네임 변경 실패");
+			throw new UserException("닉네임 변경에 실패했습니다.");
+		}
+
+		return result.getNickName();
+	}
+
+	@Override
+	public void updatePassword(String userId, String password, String newPassword) {
+		logger.info("UserServiceImpl.updatePassword() is called");
+
+		UserEntity userEntity = userDao.get(userId);
+		if (userEntity == null) {
+			logger.warn("UserServiceImpl.updatePassword() : 아이디 조회 실패");
+			throw new UserException("등록된 아이디를 찾지 못했습니다.");
+		}
+
+		if (!userEntity.getPwd().equals(password)) {
+			logger.warn("UserServiceImpl.updatePassword() : 비밀번호 불일치");
+			throw new UserException("비밀번호가 일치하지 않습니다.");
+		}
+
+		logger.info("UserServiceImpl.updatePassword() : 비밀번호 일치");
+		userEntity.setPwd(newPassword);
+		UserEntity result = userDao.save(userEntity);
+		if (result == null) {
+			logger.warn("UserServiceImpl.updatePassword() : 비밀번호 변경 실패");
+			throw new UserException("비밀번호 변경에 실패했습니다.");
+		}
+
+		logger.info("UserServiceImpl.updatePassword() : 비밀번호 변경 성공");
+	}
+
+	@Override
+	public String updateLocation(String userId, String location) {
+		logger.info("UserServiceImpl.updateLocation() is called");
+
+		LocationEntity locationEntity;
+		locationEntity = userDao.findByUserId(userId);
+		if (locationEntity == null) {
+			logger.warn("UserServiceImpl.updateLocation() : 등록된 위치 정보 없음, 위치 정보 생성");
+			locationEntity = LocationEntity.builder()
+				.userId(userId)
+				.location(location)
+				.build();
+		} else {
+			locationEntity.setLocation(location);
+		}
+
+		// save == update // 저장 == 수정 // 근데 이러면 계속 늘어나는데
+		// 조회 - 수정
+		LocationEntity result = userDao.saveLocation(locationEntity);
+		if (result == null) {
+			logger.warn("UserServiceImpl.updateLocation() : 위치 변경 실패");
+			throw new UserException("위치 변경에 실패했습니다.");
+		}
+
+		logger.info("UserServiceImpl.updateLocation() : 위치 변경 성공");
+		return result.getLocation();
 	}
 }
