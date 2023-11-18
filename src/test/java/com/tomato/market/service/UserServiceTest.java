@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.tomato.market.dao.impl.UserDaoImpl;
 import com.tomato.market.data.dto.UserLoginDto;
 import com.tomato.market.data.dto.UserSignUpDto;
+import com.tomato.market.data.entity.LocationEntity;
 import com.tomato.market.data.entity.UserEntity;
 import com.tomato.market.handler.exception.UserException;
 import com.tomato.market.service.impl.UserServiceImpl;
@@ -43,6 +44,8 @@ public class UserServiceTest {
 	private UserEntity userEntity;
 	private UserLoginDto userLoginDto;
 
+	private LocationEntity locationEntity;
+	private String location = "서울시 ...";
 
 	@BeforeEach
 	void setUp() throws ParseException {
@@ -68,6 +71,11 @@ public class UserServiceTest {
 		userLoginDto = UserLoginDto.builder()
 			.id(id)
 			.pwd(pwd)
+			.build();
+
+		locationEntity = LocationEntity.builder()
+			.userId(id)
+			.location(location)
 			.build();
 	}
 
@@ -212,5 +220,90 @@ public class UserServiceTest {
 
 		// 검증
 		verify(userDao).get(userLoginDto.getId());
+	}
+
+	@Test
+	@DisplayName("사용자_닉네임_변경_성공")
+	void updateNicknameSuccess() {
+		given(userDao.get(any(String.class))).willReturn(userEntity);
+		given(userDao.save(any(UserEntity.class))).willReturn(userEntity);
+
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		Assertions.assertEquals(userService.updateNickname(id, nickName), nickName);
+
+		verify(userDao).get(any(String.class));
+		verify(userDao).save(any(UserEntity.class));
+	}
+
+	@Test
+	@DisplayName("사용자_닉네임_변경_실패")
+	void updateNicknameFailure() {
+		given(userDao.get(any(String.class))).willReturn(userEntity);
+		given(userDao.save(any(UserEntity.class))).willReturn(null);
+
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		UserException exception = Assertions.assertThrows(UserException.class, () -> {
+			userService.updateNickname(id, nickName);
+		});
+		Assertions.assertEquals(exception.getMessage(), "닉네임 변경에 실패했습니다.");
+
+		verify(userDao).get(any(String.class));
+		verify(userDao).save(any(UserEntity.class));
+	}
+
+	@Test
+	@DisplayName("사용자_비밀번호_변경_성공")
+	void updatePasswordSuccess() {
+		given(userDao.get(any(String.class))).willReturn(userEntity);
+		given(userDao.save(any(UserEntity.class))).willReturn(userEntity);
+
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		userService.updatePassword(id, pwd, pwd);
+
+		verify(userDao).get(any(String.class));
+		verify(userDao).save(any(UserEntity.class));
+	}
+
+	@Test
+	@DisplayName("사용자_비밀번호_변경_비밀번호_불일치")
+	void updatePasswordFailure() {
+		given(userDao.get(any(String.class))).willReturn(userEntity);
+
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		UserException exception = Assertions.assertThrows(UserException.class, () -> {
+			userService.updatePassword(id, pwd + 1, pwd);
+		});
+		Assertions.assertEquals(exception.getMessage(), "비밀번호가 일치하지 않습니다.");
+
+		verify(userDao).get(any(String.class));
+	}
+
+	@Test
+	@DisplayName("사용자_위치정보_변경_성공")
+	void updateLocationSuccess() {
+		given(userDao.findByUserId(any(String.class))).willReturn(locationEntity);
+		given(userDao.saveLocation(any(LocationEntity.class))).willReturn(locationEntity);
+
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		Assertions.assertEquals(userService.updateLocation(id, location), location);
+
+		verify(userDao).findByUserId(any(String.class));
+		verify(userDao).saveLocation(any(LocationEntity.class));
+	}
+
+	@Test
+	@DisplayName("사용자_위치정보_변경_실패")
+	void updateLocationFailure() {
+		given(userDao.findByUserId(any(String.class))).willReturn(locationEntity);
+		given(userDao.saveLocation(any(LocationEntity.class))).willReturn(null);
+
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		UserException exception = Assertions.assertThrows(UserException.class, () -> {
+			userService.updateLocation(id, location);
+		});
+		Assertions.assertEquals(exception.getMessage(), "위치 변경에 실패했습니다.");
+
+		verify(userDao).findByUserId(any(String.class));
+		verify(userDao).saveLocation(any(LocationEntity.class));
 	}
 }
