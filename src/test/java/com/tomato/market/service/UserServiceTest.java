@@ -306,4 +306,26 @@ public class UserServiceTest {
 		verify(userDao).findByUserId(any(String.class));
 		verify(userDao).saveLocation(any(LocationEntity.class));
 	}
+
+	@Test
+	@DisplayName("사용자_위치정보_조회_성공")
+	void getLocationSuccess() {
+		given(userDao.findByUserId(any(String.class))).willReturn(locationEntity);
+
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		Assertions.assertEquals(userService.getLocation(id), location);
+
+		verify(userDao).findByUserId(any(String.class));
+	}
+
+	@Test
+	@DisplayName("사용자_위치정보_조회_실패")
+	void getLocationFailure() {
+		given(userDao.findByUserId(any(String.class))).willReturn(null);
+
+		UserServiceImpl userService = new UserServiceImpl(userDao);
+		Assertions.assertEquals(userService.getLocation(id), null);
+
+		verify(userDao).findByUserId(any(String.class));
+	}
 }

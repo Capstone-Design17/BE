@@ -174,6 +174,22 @@ public class UserController {
 			.message("위치 변경 성공")
 			.data(userLocation)
 			.build();
+	}
 
+	@GetMapping("/user/location")
+	public ResponseDto<String> getLocation(String userId) {
+		logger.info("UserController.getLocation() is called");
+
+		String userLocation = userService.getLocation(userId);
+		logger.info("UserController.getLocation() : 위치 조회 성공");
+		String message = "위치 조회 성공";
+		if (userLocation == null) {
+			message = "등록된 위치정보 없음";
+		}
+		return ResponseDto.<String>builder()
+			.status(HttpStatus.OK)
+			.message(message)
+			.data(userLocation)
+			.build();
 	}
 }

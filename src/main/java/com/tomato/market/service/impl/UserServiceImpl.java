@@ -165,4 +165,18 @@ public class UserServiceImpl implements UserService {
 		logger.info("UserServiceImpl.updateLocation() : 위치 변경 성공");
 		return result.getLocation();
 	}
+
+	@Override
+	public String getLocation(String userId) {
+		logger.info("UserServiceImpl.getLocation() is called");
+
+		LocationEntity locationEntity = userDao.findByUserId(userId);
+		if (locationEntity == null) {
+			logger.info("UserServiceImpl.getLocation() : 등록된 위치 정보 없음");
+			return null;
+		} else {
+			logger.info("UserServiceImpl.getLocation() : 등록된 위치 정보 찾음");
+			return locationEntity.getLocation();
+		}
+	}
 }

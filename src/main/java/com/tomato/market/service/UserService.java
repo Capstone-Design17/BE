@@ -14,4 +14,5 @@ public interface UserService {
 
 	String updateLocation(String userId, String location);
 
+	String getLocation(String userId);
 }

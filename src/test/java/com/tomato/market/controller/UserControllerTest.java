@@ -432,4 +432,30 @@ public class UserControllerTest {
 
 		verify(userService).updateLocation(any(String.class), any(String.class));
 	}
+
+	@Test
+	@DisplayName("사용자_위치정보_조회_성공")
+	void getLocationSuccess() throws Exception {
+		given(userService.getLocation(any(String.class))).willReturn(location);
+
+		mockMvc.perform(get("/api/user/location").param("userId", id))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("위치 조회 성공")))
+			.andDo(print());
+
+		verify(userService).getLocation(any(String.class));
+	}
+
+	@Test
+	@DisplayName("사용자_위치정보_조회_실패")
+	void getLocationFailure() throws Exception {
+		given(userService.getLocation(any(String.class))).willReturn(null);
+
+		mockMvc.perform(get("/api/user/location").param("userId", id))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("등록된 위치정보 없음")))
+			.andDo(print());
+
+		verify(userService).getLocation(any(String.class));
+	}
 }
