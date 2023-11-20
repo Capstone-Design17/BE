@@ -165,6 +165,7 @@ public class UserController {
 	@PutMapping("/user/location")
 	public ResponseDto<String> updateLocation(String userId, String location) {
 		logger.info("UserController.updateLocation() is called");
+		logger.info(userId + " : " + location);
 
 		String userLocation = userService.updateLocation(userId, location);
 		logger.info("UserController.updateLocation() : 위치 번경 성공");

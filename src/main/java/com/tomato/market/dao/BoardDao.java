@@ -33,4 +33,6 @@ public interface BoardDao {
 	List<FavoriteEntity> findByUserId(String userId);
 
 	List<PostEntity> findPostByUserId(String userId);
+
+	Page<PostEntity> findByLocation(String keyword, Pageable pageable);
 }

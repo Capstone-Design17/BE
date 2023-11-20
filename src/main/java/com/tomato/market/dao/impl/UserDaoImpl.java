@@ -105,6 +105,7 @@ public class UserDaoImpl implements UserDao {
 			logger.warn("UserDaoImpl.findByUserId() : 데이터 조회 실패");
 			return null;
 		} else {
+			logger.info(locationEntity.toString());
 			logger.info("UserDaoImpl.findByUserId() : 데이터 조회 성공");
 			return locationEntity;
 		}
@@ -119,6 +120,7 @@ public class UserDaoImpl implements UserDao {
 			logger.warn("UserDaoImpl.saveLocation() : 데이터 저장 실패");
 			return null;
 		} else {
+			logger.info(result.toString());
 			logger.info("UserDaoImpl.saveLocation() : 데이터 저장 성공");
 			return result;
 		}

@@ -101,10 +101,24 @@ public class BoardDaoImpl implements BoardDao {
 
 		Page<PostEntity> postEntities = postRepository.findByCategoryContaining(keyword, pageable);
 		if (postEntities != null) {
-			logger.info("BoardDaoImpl.findPostSearchList() : 검색 목록 조회 성공");
+			logger.info("BoardDaoImpl.findByCategory() : 검색 목록 조회 성공");
 			return postEntities;
 		} else {
-			logger.warn("BoardDaoImpl.findPostSearchList() : 검색 목록 조회 실패");
+			logger.warn("BoardDaoImpl.findByCategory() : 검색 목록 조회 실패");
+			throw new BoardException("검색 결과 목록을 불러오지 못했습니다.");
+		}
+	}
+
+	@Override
+	public Page<PostEntity> findByLocation(String keyword, Pageable pageable) {
+		logger.info("BoarDaoImpl.findByLocation() is called");
+
+		Page<PostEntity> postEntities = postRepository.findByLocationContaining(keyword, pageable);
+		if (postEntities != null) {
+			logger.info("BoardDaoImpl.findByLocation() : 검색 목록 조회 성공");
+			return postEntities;
+		} else {
+			logger.warn("BoardDaoImpl.findByLocation() : 검색 목록 조회 실패");
 			throw new BoardException("검색 결과 목록을 불러오지 못했습니다.");
 		}
 	}

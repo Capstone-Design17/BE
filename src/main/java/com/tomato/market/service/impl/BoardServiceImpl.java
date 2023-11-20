@@ -124,6 +124,9 @@ public class BoardServiceImpl implements BoardService {
 		} else if (searchDto.getType().equals("C")) {
 			logger.info("BoardServiceImpl.getPostSearchList() : Category로 검색");
 			postEntities = boardDao.findByCategory(searchDto.getKeyword(), pageable);
+		} else if (searchDto.getType().equals("L")) {
+			logger.info("BoardServiceImpl.getPostSearchList() : Location으로 검색");
+			postEntities = boardDao.findByLocation(searchDto.getKeyword(), pageable);
 		}
 
 		if (postEntities == null) {

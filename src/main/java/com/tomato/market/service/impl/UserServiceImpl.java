@@ -151,6 +151,7 @@ public class UserServiceImpl implements UserService {
 				.location(location)
 				.build();
 		} else {
+			logger.info("UserServiceImpl.updateLocation() : 입력된 위치 정보로 변경");
 			locationEntity.setLocation(location);
 		}
 
