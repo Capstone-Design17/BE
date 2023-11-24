@@ -24,9 +24,6 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api")
 public class UserController {
-	/*	회원가입
-	   	로그인
-		로그아웃	*/
 
 	private final Logger logger = LoggerFactory.getLogger(UserController.class);
 	private final UserService userService;
@@ -35,9 +32,6 @@ public class UserController {
 	public UserController(UserService userService) {
 		this.userService = userService;
 	}
-
-
-//	@GetMapping("/user/register") // react에서 처리?
 
 	@PostMapping("/user/register")
 	public UserResponseDto registerUser(@RequestBody @Valid UserSignUpDto userSignUpDto) { // DTO로 Body값 받음, Valid로 검증
