@@ -1,9 +1,5 @@
 package com.tomato.market.data.entity;
 
-import java.util.Date;
-
-import org.hibernate.annotations.DynamicInsert;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,25 +15,16 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @ToString
-@AllArgsConstructor
-@NoArgsConstructor
-@Table(name = "user")
-@DynamicInsert
-public class UserEntity {
-
+@Table(name = "favorite")
+public class FavoriteEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	Integer userNum;
-	String id;
-	String pwd;
-	String name;
-	String nickName;
-	String phone;
-	String email;
-	Date birth;
-	String lastLogin;
-	Integer status;
-	String resignReason;
+	private Integer favoriteNum;
+	private String userId;
+	private Integer postNum;
+	private Integer status; // 1 등록 0 취소
 }

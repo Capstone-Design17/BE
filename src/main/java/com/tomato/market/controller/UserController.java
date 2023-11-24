@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tomato.market.data.dto.ResponseDto;
 import com.tomato.market.data.dto.UserLoginDto;
 import com.tomato.market.data.dto.UserResponseDto;
 import com.tomato.market.data.dto.UserSignUpDto;
@@ -22,9 +24,6 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api")
 public class UserController {
-	/*	회원가입
-	   	로그인
-		로그아웃	*/
 
 	private final Logger logger = LoggerFactory.getLogger(UserController.class);
 	private final UserService userService;
@@ -33,9 +32,6 @@ public class UserController {
 	public UserController(UserService userService) {
 		this.userService = userService;
 	}
-
-
-//	@GetMapping("/user/register") // react에서 처리?
 
 	@PostMapping("/user/register")
 	public UserResponseDto registerUser(@RequestBody @Valid UserSignUpDto userSignUpDto) { // DTO로 Body값 받음, Valid로 검증
@@ -121,6 +117,74 @@ public class UserController {
 		return UserResponseDto.builder()
 			.status(HttpStatus.OK)
 			.message("로그아웃 되었습니다.")
+			.build();
+	}
+
+	// 닉네임 변경
+	// PutMapping?
+	@PutMapping("/user/nickname")
+	public ResponseDto<String> updateNickname(String userId, String nickname) {
+		logger.info("UserController.updateNickname() is called");
+
+		// UserId의 Nickname을 수정
+		// Service에서 -> DAO로 전달
+		// DAO에서 userId를 업데이트하려면 UserDto가 필요?
+		// 그러면 조회->수정 순서로 이루어져야 하나?
+		String userNickname = userService.updateNickname(userId, nickname);
+		logger.info("UserController.updateNickname() : 닉네임 변경 완료");
+
+		// ReponseDto를 사용하기로 함, 기존에 작성된 코드는 시간관계상 그대로 두겠음
+		return ResponseDto.<String>builder()
+			.status(HttpStatus.OK)
+			.message("닉네임 변경 성공")
+			.data(userNickname)
+			.build();
+	}
+
+	// 비밀번호 변경
+	@PutMapping("/user/password")
+	public ResponseDto<Object> updatePassword(String userId, String password, String newPassword) {
+		logger.info("UserController.updatePassword() is called");
+
+		userService.updatePassword(userId, password, newPassword);
+		logger.info("UserController.updatePassword() : 비밀번호 변경 완료");
+
+		return ResponseDto.<Object>builder()
+			.status(HttpStatus.OK)
+			.message("비밀번호 변경 성공")
+			.build();
+	}
+
+	// 위치정보 변경
+	@PutMapping("/user/location")
+	public ResponseDto<String> updateLocation(String userId, String location) {
+		logger.info("UserController.updateLocation() is called");
+		logger.info(userId + " : " + location);
+
+		String userLocation = userService.updateLocation(userId, location);
+		logger.info("UserController.updateLocation() : 위치 번경 성공");
+
+		return ResponseDto.<String>builder()
+			.status(HttpStatus.OK)
+			.message("위치 변경 성공")
+			.data(userLocation)
+			.build();
+	}
+
+	@GetMapping("/user/location")
+	public ResponseDto<String> getLocation(String userId) {
+		logger.info("UserController.getLocation() is called");
+
+		String userLocation = userService.getLocation(userId);
+		logger.info("UserController.getLocation() : 위치 조회 성공");
+		String message = "위치 조회 성공";
+		if (userLocation == null) {
+			message = "등록된 위치정보 없음";
+		}
+		return ResponseDto.<String>builder()
+			.status(HttpStatus.OK)
+			.message(message)
+			.data(userLocation)
 			.build();
 	}
 }

@@ -44,6 +44,7 @@ public class PostDto {
 	public static PostEntity toPostEntity(PostDto postDto) {
 
 		return PostEntity.builder()
+			.postNum(postDto.getPostNum())
 			.userId(postDto.getUserId())
 			.location(postDto.getLocation())
 			.title(postDto.getTitle())
@@ -52,6 +53,7 @@ public class PostDto {
 			.price(postDto.getPrice())
 			.detailLocation(postDto.getDetailLocation())
 			.status(postDto.getStatus())
+			.createdAt(postDto.getCreateAt())
 			.boughtUserId(postDto.getBoughtUserId())
 			.build();
 	}

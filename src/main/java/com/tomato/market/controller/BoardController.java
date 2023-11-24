@@ -15,18 +15,24 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PageDto;
 import com.tomato.market.data.dto.PostDto;
 import com.tomato.market.data.dto.PostListResponseDto;
 import com.tomato.market.data.dto.PostResponseDto;
+import com.tomato.market.data.dto.ResponseDto;
+import com.tomato.market.data.dto.SearchDto;
 import com.tomato.market.service.BoardService;
 
 import jakarta.validation.Valid;
@@ -84,18 +90,20 @@ public class BoardController {
 	@GetMapping(value = "/board/getPostList")
 	public PostListResponseDto getPostList(
 		@PageableDefault(page = 0, size = 10, sort = "postNum", direction = Sort.Direction.DESC) Pageable pageable,
-		@RequestParam(required = false) String keyword) throws MalformedURLException {
+		@ModelAttribute SearchDto searchDto) throws MalformedURLException { // keyword 대신 DTO로 받음
+
 		logger.info("BoardController.getPostList() is called");
 //		logger.info("BoardController.getPostList() page : " + pageable.getPageNumber());
+		logger.info("BoardController.getPostList() : Search DTO-" + searchDto.toString());
 
 		// 게시글 리스트를 받음
 		Page<PostDto> postList = null;
-		if (keyword == null) {
+		if (searchDto.getType() == null) {
 			logger.info("BoardController.getPostList() : 검색 키워드 없음");
 			postList = boardService.getPostList(pageable);
 		} else {
 			logger.info("BoardController.getPostList() : 검색 키워드 있음");
-			postList = boardService.getPostSearchList(keyword, pageable);
+			postList = boardService.getPostSearchList(searchDto, pageable); // 이걸로 변경할 것
 		}
 
 
@@ -157,4 +165,146 @@ public class BoardController {
 			.imageList(imageList)
 			.build();
 	}
+
+	// 관심등록
+	/* flow
+		PostDetail에서 버튼을 클릭
+		관심등록(좋아요 +1), 재클릭시 취소(삭제) -> 삭제말고 status로 하는게?
+		각 사용자당 각각 처리되어야 함
+		UserEntity에 ManyToOne : 다 대 일 연관관계 매핑?
+		별도 Table로 분리?
+			UserId, PostNum
+	 */
+
+
+	// 관심 등록/취소
+	@PostMapping("/board/favorite")
+	public ResponseDto<FavoriteDto> addFavorite(@RequestBody FavoriteDto favoriteDto) {
+		logger.info("BoardController.addFavorite() is called");
+
+		// status가 "on"이면 현재 등록된 상태
+		FavoriteDto result = boardService.addFavorite(favoriteDto.getUserId(), favoriteDto.getPostNum(),
+			favoriteDto.getStatus());
+		String message = "";
+		if (result.getStatus() == 1) {
+			message = "관심 등록 성공";
+		} else {
+			message = "관심 등록 취소 성공";
+		}
+		logger.info(result.toString());
+
+		// 좋아요 전체 개수를 리턴? // boardEntity 자체를 수정?
+		return ResponseDto.<FavoriteDto>builder().status(HttpStatus.OK).message(message).data(result)
+			.build();
+	}
+
+	// 관심 등록 확인
+	@GetMapping("/board/favorite")
+	public ResponseDto<FavoriteDto> getFavorite(String userId, Integer postNum) {
+		logger.info("BoardController.getFavorite() is called");
+
+		FavoriteDto favoriteDto = boardService.getFavorite(userId, postNum);
+		logger.info("BoardController.getFavorite() : 관심 등록 조회 성공");
+
+		return ResponseDto.<FavoriteDto>builder()
+			.status(HttpStatus.OK)
+			.message("관심 등록 확인 성공")
+			.data(favoriteDto)
+			.build();
+	}
+
+	@GetMapping("/board/favorite/list")
+	public ResponseDto<PostListResponseDto> getFavoriteList(String userId) {
+		logger.info("BoardController.getFavoriteList() is called");
+
+		// 관심 목록 번호 조회
+		List<FavoriteDto> favoriteDtoList = boardService.getFavoriteList(userId);
+		logger.info("BoardController.getFavoriteList() : 관심 목록 조회 성공");
+
+		// 관심 목록에 대한 PostList 조회
+		// fovoriteList에 대한 가공 -> 조회
+		List<PostDto> postDtoList = new ArrayList<>();
+		for (FavoriteDto favoriteDto : favoriteDtoList) {
+			postDtoList.add(boardService.getPost(favoriteDto.getPostNum()));
+		}
+
+		// PostList에 대한 ImageList 조회
+		List<ImageDto> imageDtoList = new ArrayList<>();
+		for (PostDto postDto : postDtoList) {
+			imageDtoList.add(boardService.getPostImage(postDto.getPostNum()));
+		}
+
+		PostListResponseDto responseDto = PostListResponseDto.builder()
+			.postList(postDtoList)
+			.imageList(imageDtoList)
+			.build();
+
+		return ResponseDto.<PostListResponseDto>builder()
+			.status(HttpStatus.OK)
+			.message("관심 목록 조회 성공")
+			.data(responseDto) // 어떤 형식으로 넘기지?
+			.build();
+	}
+
+
+	// 게시글 내용 변경
+	@PutMapping("/board/post") // null 값 그대로 전달
+	public ResponseDto<PostDto> updatePost(@RequestBody PostDto postDto) {
+		logger.info("BoardController.updatePost() is called");
+
+		// 게시글 수정
+		PostDto result = boardService.updatePost(postDto);
+
+		// 이미지 수정은 어떻게?
+
+		logger.info("BoardController.updatePost() : 게시글 수정 성공");
+		return ResponseDto.<PostDto>builder()
+			.status(HttpStatus.OK)
+			.message("게시글 수정 성공")
+			.data(postDto)
+			.build();
+	}
+
+	// 판매 상태 변경
+	// Patch?
+	@PatchMapping("board/post")
+	public ResponseDto<PostDto> updateStatus(@RequestBody PostDto postDto) {
+		logger.info("BoardController.updateStatus() is called");
+
+		PostDto result = boardService.updateStatus(postDto);
+
+		logger.info("BoardController.updateStatus() : 게시글 상태 수정 성공");
+		return ResponseDto.<PostDto>builder()
+			.status(HttpStatus.OK)
+			.message("게시글 상태 수정 성공")
+			.data(result)
+			.build();
+	}
+
+	// 판매 목록
+	@GetMapping("/board/sellList")
+	public ResponseDto<PostListResponseDto> getSellList(String userId) {
+		logger.info("BoardController.getSellList() is called");
+
+		List<PostDto> postDtoList = boardService.getSellList(userId);
+		logger.info("BoardController.getSellList() : 판매 목록 조회 성공");
+
+		// PostList에 대한 ImageList 조회
+		List<ImageDto> imageDtoList = new ArrayList<>();
+		for (PostDto postDto : postDtoList) {
+			imageDtoList.add(boardService.getPostImage(postDto.getPostNum()));
+		}
+
+		PostListResponseDto responseDto = PostListResponseDto.builder()
+			.postList(postDtoList)
+			.imageList(imageDtoList)
+			.build();
+
+		return ResponseDto.<PostListResponseDto>builder()
+			.status(HttpStatus.OK)
+			.message("판매 목록 조회 성공")
+			.data(responseDto)
+			.build();
+	}
+
 }

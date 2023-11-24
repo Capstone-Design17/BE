@@ -16,8 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tomato.market.dao.BoardDao;
+import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
+import com.tomato.market.data.dto.SearchDto;
+import com.tomato.market.data.entity.FavoriteEntity;
 import com.tomato.market.data.entity.ImageEntity;
 import com.tomato.market.data.entity.PostEntity;
 import com.tomato.market.handler.exception.BoardException;
@@ -111,10 +114,21 @@ public class BoardServiceImpl implements BoardService {
 	}
 
 	@Override
-	public Page<PostDto> getPostSearchList(String keyword, Pageable pageable) {
+	public Page<PostDto> getPostSearchList(SearchDto searchDto, Pageable pageable) {
 		logger.info("BoardServiceImpl.getPostSearchList() is called");
 
-		Page<PostEntity> postEntities = boardDao.findPostSearchList(keyword, pageable);
+		Page<PostEntity> postEntities = null;
+		if (searchDto.getType().equals("T")) {
+			logger.info("BoardServiceImpl.getPostSearchList() : Title로 검색");
+			postEntities = boardDao.findPostSearchList(searchDto.getKeyword(), pageable);
+		} else if (searchDto.getType().equals("C")) {
+			logger.info("BoardServiceImpl.getPostSearchList() : Category로 검색");
+			postEntities = boardDao.findByCategory(searchDto.getKeyword(), pageable);
+		} else if (searchDto.getType().equals("L")) {
+			logger.info("BoardServiceImpl.getPostSearchList() : Location으로 검색");
+			postEntities = boardDao.findByLocation(searchDto.getKeyword(), pageable);
+		}
+
 		if (postEntities == null) {
 			logger.warn("BoardServiceImpl.getPostSearchList() : 검색 결과 목록 조회 실패");
 			throw new BoardException("검색 결과 목록을 불러오지 못했습니다.");
@@ -183,5 +197,130 @@ public class BoardServiceImpl implements BoardService {
 			imageList.add(ImageDto.toImageDto(imageEntity));
 		}
 		return imageList;
+	}
+
+	@Override
+	public FavoriteDto addFavorite(String userId, Integer postNum, Integer status) {
+		logger.info("BoardServiceImpl.addFavorite() is called");
+		logger.info("BoardServiceImpl.addFavorite() : 관심 등록 조회");
+		FavoriteEntity favoriteEntity = boardDao.findByUserIdAndPostNum(userId, postNum);
+		FavoriteEntity result;
+		if (favoriteEntity == null) {
+			logger.info("BoardServiceImpl.addFavorite() : 등록된 관심 등록 없음");
+			FavoriteEntity entity = FavoriteEntity.builder().userId(userId).postNum(postNum).status(1).build();
+			result = boardDao.save(entity);
+			if (result == null) {
+				logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 실패");
+				throw new BoardException("관심 등록에 실패했습니다.");
+
+			}
+			logger.info("BoardServiceImpl.addFavorite() : 관심 등록 성공");
+		} else {
+			if (status == 1) {
+				favoriteEntity.setStatus(0);
+				result = boardDao.save(favoriteEntity);
+				if (result == null) {
+					logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 취소 실패");
+					throw new BoardException("관심 등록 취소에 실패했습니다.");
+				}
+				logger.info("BoardServiceImpl.addFavorite() : 관심 등록 취소 성공");
+			} else {
+				favoriteEntity.setStatus(1);
+				result = boardDao.save(favoriteEntity);
+				if (result == null) {
+					logger.warn("BoardServiceImpl.addFavorite() : 관심 등록 실패");
+					throw new BoardException("관심 등록에 실패했습니다.");
+				}
+				logger.info("BoardServiceImpl.addFavorite() : 관심 등록 성공");
+			}
+		}
+
+		return FavoriteDto.toFavoriteDto(result);
+	}
+
+	@Override
+	public FavoriteDto getFavorite(String userId, Integer postNum) {
+		logger.info("BoardServiceImpl.getFavorite() is called");
+		FavoriteEntity result = boardDao.findByUserIdAndPostNum(userId, postNum);
+		if (result == null) {
+			logger.warn("BoardServiceImpl.getFavorite() : 데이터 조회 실패");
+			throw new BoardException("관심 등록 조회에 실패했습니다.");
+		}
+		logger.info("BoardServiceImpl.getFavorite() : 데이터 조회 성공");
+		return FavoriteDto.toFavoriteDto(result);
+	}
+
+	@Override
+	public List<FavoriteDto> getFavoriteList(String userId) {
+		logger.info("BoardServiceImpl.getFavoriteList() is called");
+		List<FavoriteEntity> favoriteEntities = boardDao.findByUserId(userId);
+		if (favoriteEntities == null) {
+			logger.warn("BoardServiceImpl.getFavoriteList() : 관심 목록 조회 실패");
+			throw new BoardException("관심 목록 조회에 실패했습니다.");
+		}
+		logger.info("BoardServiceImpl.getFavoriteList() : 관심 목록 조회 성공");
+		List<FavoriteDto> favoriteDtoList = new ArrayList<>();
+		for (FavoriteEntity favoriteEntity : favoriteEntities) {
+			if (favoriteEntity.getStatus() == 1) {
+				// JPA로 바꿔도 가능
+				favoriteDtoList.add(FavoriteDto.toFavoriteDto(favoriteEntity));
+			}
+		}
+		return favoriteDtoList;
+	}
+
+	@Override
+	public PostDto updatePost(PostDto postDto) {
+		logger.info("BoardServiceImpl.updatePost() is called");
+
+		PostEntity postEntity = boardDao.save(PostDto.toPostEntity(postDto));
+		if (postEntity == null) {
+			logger.warn("BoardServiceImpl.updatePost() : 게시글 수정 실패");
+			throw new BoardException("게시글 수정에 실패했습니다.");
+		}
+
+		logger.info("BoardServiceImpl.updatePost() : 게시글 수정 성공");
+		return PostDto.toPostDto(postEntity);
+	}
+
+	@Override
+	public PostDto updateStatus(PostDto postDto) {
+		logger.info("BoardServiceImpl.updateStatus() is called");
+
+		PostEntity postEntity = boardDao.findPostByPostNum(postDto.getPostNum());
+		if (postEntity == null) {
+			logger.info("BoardServiceImpl.updateStatus() : 게시글 조회 실패");
+			throw new BoardException("게시글 조회에 실패했습니다.");
+		}
+
+		logger.info("BoardServiceImpl.updateStatus() : 게시글 조회 성공");
+		postEntity.setStatus(postDto.getStatus());
+		PostEntity result = boardDao.save(postEntity);
+		if (result == null) {
+			logger.warn("BoardServiceImpl.updateStatus() : 게시글 수정 실패");
+			throw new BoardException("게시글 상태 수정에 실패했습니다.");
+		}
+
+		logger.info("BoardServiceImpl.updateStatus() : 게시글 수정 성공");
+		return PostDto.toPostDto(result);
+	}
+
+	@Override
+	public List<PostDto> getSellList(String userId) {
+		logger.info("BoardServiceImpl.getSellList() is called");
+
+		List<PostEntity> postEntities = boardDao.findPostByUserId(userId);
+		if (postEntities == null) {
+			logger.warn("BoardServiceImpl.getSellList() : 판매 목록 조회 실패");
+			throw new BoardException("판매 목록 조회에 실패했습니다.");
+		}
+
+		logger.info("BoardServiceImpl.getSellList() : 판매 목록 조회 성공");
+		List<PostDto> postDtoList = new ArrayList<>();
+		for (PostEntity postEntity : postEntities) {
+			postDtoList.add(PostDto.toPostDto(postEntity));
+		}
+
+		return postDtoList;
 	}
 }

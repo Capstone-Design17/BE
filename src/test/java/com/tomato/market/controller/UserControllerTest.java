@@ -1,9 +1,14 @@
 package com.tomato.market.controller;
 
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -23,6 +28,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
@@ -60,6 +67,8 @@ public class UserControllerTest {
 
 	private UserLoginDto userLoginDto;
 	private String loginContent = "";
+
+	private String location = "서울시 ...";
 
 	@Autowired
 	private WebApplicationContext ctx; // 인코딩
@@ -319,5 +328,134 @@ public class UserControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(content().string("{\"status\":\"OK\",\"message\":\"로그아웃 되었습니다.\"}"))
 			.andDo(print());
+	}
+
+	@Test
+	@DisplayName("사용자_닉네임_변경_성공")
+	void updateNicknameSuccess() throws Exception {
+		given(userService.updateNickname(any(String.class), any(String.class))).willReturn(nickName);
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("userId", id);
+		map.add("nickname", nickName);
+		mockMvc.perform(put("/api/user/nickname").params(map))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("닉네임 변경 성공")))
+			.andExpect(jsonPath("$.data", is(nickName)))
+			.andDo(print());
+
+		verify(userService).updateNickname(any(String.class), any(String.class));
+	}
+
+	@Test
+	@DisplayName("사용자_닉네임_변경_실패")
+	void updateNicknameFailure() throws Exception {
+		given(userService.updateNickname(any(String.class), any(String.class)))
+			.willThrow(new UserException("닉네임 변경에 실패했습니다."));
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("userId", id);
+		map.add("nickname", nickName);
+		mockMvc.perform(put("/api/user/nickname").params(map))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("닉네임 변경에 실패했습니다.")))
+			.andDo(print());
+
+		verify(userService).updateNickname(any(String.class), any(String.class));
+	}
+
+	@Test
+	@DisplayName("사용자_비밀번호_변경_성공")
+	void updatePasswordSuccess() throws Exception {
+		doNothing().when(userService).updatePassword(any(String.class), any(String.class), any(String.class));
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("userId", id);
+		map.add("password", pwd);
+		map.add("newPassword", pwd + 1);
+		mockMvc.perform(put("/api/user/password").params(map))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("비밀번호 변경 성공")))
+			.andDo(print());
+
+		verify(userService).updatePassword(any(String.class), any(String.class), any(String.class));
+	}
+
+	@Test
+	@DisplayName("사용자_비밀번호_변경_실패")
+	void updatePasswordFailure() throws Exception {
+		doThrow(new UserException("비밀번호가 일치하지 않습니다."))
+			.when(userService).updatePassword(any(String.class), any(String.class), any(String.class));
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("userId", id);
+		map.add("password", pwd + 1);
+		map.add("newPassword", pwd + 1);
+		mockMvc.perform(put("/api/user/password").params(map))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("비밀번호가 일치하지 않습니다.")))
+			.andDo(print());
+
+		verify(userService).updatePassword(any(String.class), any(String.class), any(String.class));
+	}
+
+	@Test
+	@DisplayName("사용자_위치정보_변경_성공")
+	void updateLocationSuccess() throws Exception {
+		given(userService.updateLocation(any(String.class), any(String.class))).willReturn(location);
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("userId", id);
+		map.add("location", location);
+		mockMvc.perform(put("/api/user/location").params(map))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("위치 변경 성공")))
+			.andExpect(jsonPath("$.data", is(location)))
+			.andDo(print());
+
+		verify(userService).updateLocation(any(String.class), any(String.class));
+	}
+
+	@Test
+	@DisplayName("사용자_위치정보_변경_실패")
+	void updateLocationFailure() throws Exception {
+		given(userService.updateLocation(any(String.class), any(String.class)))
+			.willThrow(new UserException("위치 변경에 실패했습니다."));
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("userId", id);
+		map.add("location", location);
+		mockMvc.perform(put("/api/user/location").params(map))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("위치 변경에 실패했습니다.")))
+			.andDo(print());
+
+		verify(userService).updateLocation(any(String.class), any(String.class));
+	}
+
+	@Test
+	@DisplayName("사용자_위치정보_조회_성공")
+	void getLocationSuccess() throws Exception {
+		given(userService.getLocation(any(String.class))).willReturn(location);
+
+		mockMvc.perform(get("/api/user/location").param("userId", id))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("위치 조회 성공")))
+			.andDo(print());
+
+		verify(userService).getLocation(any(String.class));
+	}
+
+	@Test
+	@DisplayName("사용자_위치정보_조회_실패")
+	void getLocationFailure() throws Exception {
+		given(userService.getLocation(any(String.class))).willReturn(null);
+
+		mockMvc.perform(get("/api/user/location").param("userId", id))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message", is("등록된 위치정보 없음")))
+			.andDo(print());
+
+		verify(userService).getLocation(any(String.class));
 	}
 }

@@ -1,5 +1,6 @@
 package com.tomato.market.data.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -13,5 +14,12 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
 
 	Page<PostEntity> findByTitleContaining(String keyword, Pageable pageable);
 
+	Page<PostEntity> findByCategoryContaining(String keyword, Pageable pageable);
+
+	Page<PostEntity> findByLocationContaining(String keyword, Pageable pageable);
+
 	Optional<PostEntity> findByPostNum(Integer postNum);
+
+	List<PostEntity> findByUserId(String userId);
+
 }

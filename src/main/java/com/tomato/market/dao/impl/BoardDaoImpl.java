@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tomato.market.dao.BoardDao;
+import com.tomato.market.data.entity.FavoriteEntity;
 import com.tomato.market.data.entity.ImageEntity;
 import com.tomato.market.data.entity.PostEntity;
+import com.tomato.market.data.repository.FavoriteRepository;
 import com.tomato.market.data.repository.ImageRepository;
 import com.tomato.market.data.repository.PostRepository;
 import com.tomato.market.handler.exception.BoardException;
@@ -26,10 +28,14 @@ public class BoardDaoImpl implements BoardDao {
 	private final PostRepository postRepository;
 	private final ImageRepository imageRepository;
 
+	private final FavoriteRepository favoriteRepository;
+
 	@Autowired
-	public BoardDaoImpl(PostRepository postRepository, ImageRepository imageRepository) {
+	public BoardDaoImpl(PostRepository postRepository, ImageRepository imageRepository,
+						FavoriteRepository favoriteRepository) {
 		this.postRepository = postRepository;
 		this.imageRepository = imageRepository;
+		this.favoriteRepository = favoriteRepository;
 	}
 
 
@@ -90,6 +96,34 @@ public class BoardDaoImpl implements BoardDao {
 	}
 
 	@Override
+	public Page<PostEntity> findByCategory(String keyword, Pageable pageable) {
+		logger.info("BoardDaoImpl.findByCategory() is called");
+
+		Page<PostEntity> postEntities = postRepository.findByCategoryContaining(keyword, pageable);
+		if (postEntities != null) {
+			logger.info("BoardDaoImpl.findByCategory() : 검색 목록 조회 성공");
+			return postEntities;
+		} else {
+			logger.warn("BoardDaoImpl.findByCategory() : 검색 목록 조회 실패");
+			throw new BoardException("검색 결과 목록을 불러오지 못했습니다.");
+		}
+	}
+
+	@Override
+	public Page<PostEntity> findByLocation(String keyword, Pageable pageable) {
+		logger.info("BoarDaoImpl.findByLocation() is called");
+
+		Page<PostEntity> postEntities = postRepository.findByLocationContaining(keyword, pageable);
+		if (postEntities != null) {
+			logger.info("BoardDaoImpl.findByLocation() : 검색 목록 조회 성공");
+			return postEntities;
+		} else {
+			logger.warn("BoardDaoImpl.findByLocation() : 검색 목록 조회 실패");
+			throw new BoardException("검색 결과 목록을 불러오지 못했습니다.");
+		}
+	}
+
+	@Override
 	public ImageEntity findImageByPostNum(Integer postNum) {
 		logger.info("BoardDaoImpl.findImageByPostNum() is called");
 //		Optional<ImageEntity> imageEntity = imageRepository.findImageByPostNum(postNum);
@@ -129,5 +163,56 @@ public class BoardDaoImpl implements BoardDao {
 			logger.info("BoardDaoImpl.findImageListByPostNum() : 이미지 리스트 조회 성공");
 			return imageEntities;
 		}
+	}
+
+	@Override
+	public FavoriteEntity save(FavoriteEntity favoriteEntity) {
+		logger.info("BoardDaoImpl.save() is called");
+
+		FavoriteEntity result = favoriteRepository.save(favoriteEntity);
+		if (result == null) {
+			logger.warn("BoardDaoImpl.save() : 데이터 저장 실패");
+			return null;
+		} else {
+			logger.info("BoardDaoImpl.save() : 데이터 저장 성공");
+			return result;
+		}
+	}
+
+	@Override
+	public FavoriteEntity findByUserIdAndPostNum(String userId, Integer postNum) {
+		logger.info("BoardDaoImpl.findByUserIdAndPostNum() is called");
+		FavoriteEntity favoriteEntity = favoriteRepository.findByUserIdAndPostNum(userId, postNum);
+		if (favoriteEntity == null) {
+			logger.warn("BoardDaoImpl.findByUserIdAndPostNum() : 데이터 조회 실패");
+			return null;
+		}
+		logger.info("BoardDaoImpl.findByUserIdAndPostNum() : 데이터 조회 성공");
+		return favoriteEntity;
+	}
+
+	@Override
+	public List<FavoriteEntity> findByUserId(String userId) {
+		logger.info("BoardDaoImpl.findByUserId() is called");
+		List<FavoriteEntity> favoriteEntities = favoriteRepository.findByUserId(userId);
+		if (favoriteEntities == null) {
+			logger.warn("BoardDaoImpl.findByUserId() : 데이터 조회 실패");
+			return null;
+		}
+		logger.info("BoardDaoImpl.findByUserId() : 데이터 조회 성공");
+		return favoriteEntities;
+	}
+
+	@Override
+	public List<PostEntity> findPostByUserId(String userId) {
+		logger.info("BoardDaoImpl.findPostByUserId() is called");
+		List<PostEntity> postEntities = postRepository.findByUserId(userId);
+		if (postEntities == null) {
+			logger.warn("BoardDaoImpl.findPostByUserId : 데이터 조회 실패");
+			return null;
+		}
+
+		logger.info("BoardDaoImpl.findPostByUserId : 데이터 조회 성공");
+		return postEntities;
 	}
 }

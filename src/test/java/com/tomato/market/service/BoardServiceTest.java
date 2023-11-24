@@ -28,8 +28,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tomato.market.dao.impl.BoardDaoImpl;
+import com.tomato.market.data.dto.FavoriteDto;
 import com.tomato.market.data.dto.ImageDto;
 import com.tomato.market.data.dto.PostDto;
+import com.tomato.market.data.dto.SearchDto;
+import com.tomato.market.data.entity.FavoriteEntity;
 import com.tomato.market.data.entity.ImageEntity;
 import com.tomato.market.data.entity.PostEntity;
 import com.tomato.market.handler.exception.BoardException;
@@ -68,15 +71,25 @@ public class BoardServiceTest {
 
 	private Pageable pageable = PageRequest.of(0, 10);
 	private Page<PostEntity> postEntityList;
+
+	private SearchDto searchDto;
+	private String type = "T";
 	private String keyword = "keyword";
 	private List<PostDto> postDtoList;
 
 	private Page<PostDto> postDtoPage;
 
+	// Favorite
+	private FavoriteDto favoriteDto;
+	private List<FavoriteDto> favoriteDtoList;
+	private FavoriteEntity favoriteEntity;
+	private List<FavoriteEntity> favoriteEntities;
+
 
 	@BeforeEach
 	void setUp() {
-		postDto = PostDto.builder().userId(userId).location(location).title(title).category(category).content(content)
+		postDto = PostDto.builder().postNum(postNum).userId(userId).location(location).title(title).category(category)
+			.content(content)
 			.price(price).detailLocation(detailLocation).status(status).boughtUserId(boughtUserId).build();
 
 		postEntity = PostDto.toPostEntity(postDto);
@@ -102,6 +115,22 @@ public class BoardServiceTest {
 		postDtoList.add(PostDto.toPostDto(postEntity));
 
 		postDtoPage = new PageImpl<>(postDtoList, pageable, 2);
+
+		favoriteDto = FavoriteDto.builder()
+			.userId(userId)
+			.postNum(postNum)
+			.status(1)
+			.build();
+		favoriteDtoList = new ArrayList<>();
+		favoriteDtoList.add(favoriteDto);
+		favoriteDtoList.add(favoriteDto);
+
+		favoriteEntity = FavoriteDto.toFavoriteEntity(favoriteDto);
+		favoriteEntities = new ArrayList<>();
+		favoriteEntities.add(favoriteEntity);
+		favoriteEntities.add(favoriteEntity);
+
+		searchDto = SearchDto.builder().type(type).keyword(keyword).build();
 	}
 
 	@Test
@@ -244,7 +273,8 @@ public class BoardServiceTest {
 		given(boardDao.findPostSearchList(any(String.class), any(Pageable.class))).willReturn(postEntityList);
 
 		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
-		Assertions.assertEquals(boardService.getPostSearchList(keyword, pageable).toString(), postDtoPage.toString());
+		Assertions.assertEquals(boardService.getPostSearchList(searchDto, pageable).toString(),
+			postDtoPage.toString());
 
 		verify(boardDao).findPostSearchList(any(String.class), any(Pageable.class));
 	}
@@ -257,7 +287,7 @@ public class BoardServiceTest {
 
 		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
 		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
-			boardService.getPostSearchList(keyword, pageable);
+			boardService.getPostSearchList(searchDto, pageable);
 		});
 		Assertions.assertEquals(exception.getMessage(), "검색 결과 목록을 불러오지 못했습니다.");
 
@@ -317,5 +347,166 @@ public class BoardServiceTest {
 		Assertions.assertEquals(exception.getMessage(), "이미지를 불러오지 못했습니다.");
 
 		verify(boardDao).findImageListByPostNum(postNum);
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_성공")
+	void addFavoriteSuccess() {
+		favoriteEntity.setStatus(1);
+		favoriteDto.setStatus(1);
+		given(boardDao.save(any(FavoriteEntity.class))).willReturn(favoriteEntity);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.addFavorite(userId, postNum, 0).toString(), favoriteDto.toString());
+
+		verify(boardDao).save(any(FavoriteEntity.class));
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_실패")
+	void addFavoriteFailure() {
+		given(boardDao.findByUserIdAndPostNum(any(String.class), any(Integer.class))).willReturn(null);
+		given(boardDao.save(any(FavoriteEntity.class))).willReturn(null);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.addFavorite(userId, postNum, 0);
+		});
+		Assertions.assertEquals(exception.getMessage(), "관심 등록에 실패했습니다.");
+
+		verify(boardDao).findByUserIdAndPostNum(any(String.class), any(Integer.class));
+		verify(boardDao).save(any(FavoriteEntity.class));
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_취소_성공")
+	void cancelFavoriteSuccess() {
+		favoriteEntity.setStatus(0);
+		favoriteDto.setStatus(0);
+		given(boardDao.findByUserIdAndPostNum(any(String.class), any(Integer.class))).willReturn(favoriteEntity);
+		given(boardDao.save(any(FavoriteEntity.class))).willReturn(favoriteEntity);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.addFavorite(userId, postNum, 1).toString(), favoriteDto.toString());
+
+		verify(boardDao).findByUserIdAndPostNum(any(String.class), any(Integer.class));
+		verify(boardDao).save(any(FavoriteEntity.class));
+	}
+
+	@Test
+	@DisplayName("게시글_관심_등록_확인_성공")
+	void getFavoriteSuccess() {
+		given(boardDao.findByUserIdAndPostNum(any(String.class), any(Integer.class))).willReturn(favoriteEntity);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.getFavorite(userId, postNum).toString(), favoriteDto.toString());
+
+		verify(boardDao).findByUserIdAndPostNum(any(String.class), any(Integer.class));
+	}
+
+	@Test
+	@DisplayName("게시글_관심_목록_조회_성공")
+	void getFavoriteListSuccess() {
+		given(boardDao.findByUserId(userId)).willReturn(favoriteEntities);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.getFavoriteList(userId).toString(), favoriteDtoList.toString());
+
+		verify(boardDao).findByUserId(userId);
+	}
+
+	@Test
+	@DisplayName("게시글_관심_목록_조회_실패")
+	void getFavoriteListFailure() {
+		given(boardDao.findByUserId(userId)).willReturn(null);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.getFavoriteList(userId);
+		});
+		Assertions.assertEquals(exception.getMessage(), "관심 목록 조회에 실패했습니다.");
+
+		verify(boardDao).findByUserId(userId);
+	}
+
+	@Test
+	@DisplayName("게시글_수정_성공")
+	void updatePostSuccess() {
+		postDto.setContent("수정된 내용");
+		postEntity.setContent("수정된 내용");
+		given(boardDao.save(any(PostEntity.class))).willReturn(postEntity);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.updatePost(postDto).toString(), postDto.toString());
+
+		verify(boardDao).save(any(PostEntity.class));
+	}
+
+	@Test
+	@DisplayName("게시글_수정_실패")
+	void updatePostFailure() {
+		given(boardDao.save(any(PostEntity.class))).willThrow(new BoardException("게시글 수정에 실패했습니다."));
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.updatePost(postDto);
+		});
+		Assertions.assertEquals(exception.getMessage(), "게시글 수정에 실패했습니다.");
+
+		verify(boardDao).save(any(PostEntity.class));
+	}
+
+	@Test
+	@DisplayName("게시글_상태_수정_성공")
+	void updateStatusSuccess() {
+		given(boardDao.findPostByPostNum(any(Integer.class))).willReturn(postEntity);
+		given(boardDao.save(any(PostEntity.class))).willReturn(postEntity);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.updateStatus(postDto).toString(), postDto.toString());
+
+		verify(boardDao).findPostByPostNum(any(Integer.class));
+		verify(boardDao).save(any(PostEntity.class));
+	}
+
+	@Test
+	@DisplayName("게시글_상태_수정_실패")
+	void updateStatusFailure() {
+		given(boardDao.findPostByPostNum(any(Integer.class))).willReturn(postEntity);
+		given(boardDao.save(any(PostEntity.class))).willThrow(new BoardException("게시글 상태 수정에 실패했습니다."));
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.updateStatus(postDto);
+		});
+		Assertions.assertEquals(exception.getMessage(), "게시글 상태 수정에 실패했습니다.");
+
+		verify(boardDao).findPostByPostNum(any(Integer.class));
+		verify(boardDao).save(any(PostEntity.class));
+	}
+
+	@Test
+	@DisplayName("판매_목록_조회_성공")
+	void getSellListSuccess() {
+		given(boardDao.findPostByUserId(any(String.class))).willReturn(postEntities);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		Assertions.assertEquals(boardService.getSellList(userId).toString(), postDtoList.toString());
+
+		verify(boardDao).findPostByUserId(any(String.class));
+	}
+
+	@Test
+	@DisplayName("판매_목록_조회_실패")
+	void getSellListFailure() {
+		given(boardDao.findPostByUserId(any(String.class))).willReturn(null);
+
+		BoardServiceImpl boardService = new BoardServiceImpl(boardDao);
+		BoardException exception = Assertions.assertThrows(BoardException.class, () -> {
+			boardService.getSellList(userId);
+		});
+		Assertions.assertEquals(exception.getMessage(), "판매 목록 조회에 실패했습니다.");
+
+		verify(boardDao).findPostByUserId(any(String.class));
 	}
 }
