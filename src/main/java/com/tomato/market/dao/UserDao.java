@@ -1,5 +1,6 @@
 package com.tomato.market.dao;
 
+import com.tomato.market.data.entity.LocationEntity;
 import com.tomato.market.data.entity.UserEntity;
 
 public interface UserDao {
@@ -13,6 +14,7 @@ public interface UserDao {
 
 	public boolean existsByPhone(String phone);
 
-	/*  ### 미구현 ###	*/
+	LocationEntity findByUserId(String userId);
 
+	LocationEntity saveLocation(LocationEntity locationEntity);
 }

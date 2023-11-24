@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.tomato.market.dao.UserDao;
+import com.tomato.market.data.entity.LocationEntity;
 import com.tomato.market.data.entity.UserEntity;
+import com.tomato.market.data.repository.LocationRepository;
 import com.tomato.market.data.repository.UserRepository;
 
 @Service
@@ -15,9 +17,11 @@ public class UserDaoImpl implements UserDao {
 	private final Logger logger = LoggerFactory.getLogger(UserDaoImpl.class);
 
 	private final UserRepository userRepository;
+	private final LocationRepository locationRepository;
 
-	public UserDaoImpl(UserRepository userRepository) {
+	public UserDaoImpl(UserRepository userRepository, LocationRepository locationRepository) {
 		this.userRepository = userRepository;
+		this.locationRepository = locationRepository;
 	}
 
 	@Override
@@ -89,6 +93,36 @@ public class UserDaoImpl implements UserDao {
 		} else {
 			logger.info("UserDaoImpl.existsByPhone() : 존재하는 전화번호를 찾지 못함");
 			return false;
+		}
+	}
+
+	@Override
+	public LocationEntity findByUserId(String userId) {
+		logger.info("UserDaoImpl.findByUserId() is called");
+
+		LocationEntity locationEntity = locationRepository.findByUserId(userId);
+		if (locationEntity == null) {
+			logger.warn("UserDaoImpl.findByUserId() : 데이터 조회 실패");
+			return null;
+		} else {
+			logger.info(locationEntity.toString());
+			logger.info("UserDaoImpl.findByUserId() : 데이터 조회 성공");
+			return locationEntity;
+		}
+	}
+
+	@Override
+	public LocationEntity saveLocation(LocationEntity locationEntity) {
+		logger.info("UserDaoImpl.saveLocation() is called");
+
+		LocationEntity result = locationRepository.save(locationEntity);
+		if (result == null) {
+			logger.warn("UserDaoImpl.saveLocation() : 데이터 저장 실패");
+			return null;
+		} else {
+			logger.info(result.toString());
+			logger.info("UserDaoImpl.saveLocation() : 데이터 저장 성공");
+			return result;
 		}
 	}
 }
